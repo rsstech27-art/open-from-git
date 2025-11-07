@@ -18,43 +18,33 @@ export default function Login() {
   const { signIn, signUp, user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    const checkUserRole = async () => {
-      if (user) {
-        console.log('User detected, checking role:', user.id);
-        
-        // Fetch user role
-        const { data, error } = await supabase
+    if (!authLoading && user) {
+      const checkUserRole = async () => {
+        const { data } = await supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", user.id)
           .maybeSingle();
 
-        console.log('Role data:', data, 'Error:', error);
-
         if (data?.role === "admin") {
-          console.log('Redirecting to admin dashboard');
           navigate("/admin", { replace: true });
         } else if (data?.role === "client") {
-          console.log('Redirecting to client dashboard');
           navigate("/client", { replace: true });
         }
-      }
-    };
+      };
 
-    checkUserRole();
-  }, [user, navigate]);
+      checkUserRole();
+    }
+  }, [user, authLoading, navigate]);
 
   // Show loading screen only during initial auth check
   if (authLoading) {
-    console.log('Auth loading state:', authLoading);
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Загрузка...</div>
       </div>
     );
   }
-
-  console.log('Rendering login form, user:', user);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
