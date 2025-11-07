@@ -25,6 +25,8 @@ export default function Login() {
         navigate("/admin");
       } else if (role === "client") {
         navigate("/client");
+      } else if (role === null) {
+        navigate("/role-selection");
       }
     }
   }, [user, role, roleLoading, navigate]);
