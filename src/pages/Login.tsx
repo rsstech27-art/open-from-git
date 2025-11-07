@@ -16,18 +16,27 @@ export default function Login() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
 
   useEffect(() => {
     if (user && !roleLoading && role) {
       if (role === "admin") {
-        navigate("/admin");
+        navigate("/admin", { replace: true });
       } else if (role === "client") {
-        navigate("/client");
+        navigate("/client", { replace: true });
       }
     }
   }, [user, role, roleLoading, navigate]);
+
+  // Show loading screen while checking authentication
+  if (authLoading || (user && roleLoading)) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Загрузка...</div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
