@@ -11,28 +11,32 @@ export function useAuth() {
 
   useEffect(() => {
     let mounted = true;
+    let initialized = false;
 
-    // Check for existing session immediately
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (mounted) {
-        console.log('Initial session check:', session ? 'User logged in' : 'No user');
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    });
-
-    // Set up auth state listener
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (mounted) {
           console.log('Auth state changed:', _event, session ? 'User present' : 'No user');
           setSession(session);
           setUser(session?.user ?? null);
-          setLoading(false);
+          if (initialized) {
+            setLoading(false);
+          }
         }
       }
     );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) {
+        console.log('Initial session check:', session ? 'User logged in' : 'No user');
+        setSession(session);
+        setUser(session?.user ?? null);
+        initialized = true;
+        setLoading(false);
+      }
+    });
 
     return () => {
       mounted = false;
