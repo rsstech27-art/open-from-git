@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Login() {
@@ -17,26 +16,45 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { signIn, signUp, user, loading: authLoading } = useAuth();
-  const { role, loading: roleLoading } = useUserRole();
 
   useEffect(() => {
-    if (user && !roleLoading && role) {
-      if (role === "admin") {
-        navigate("/admin", { replace: true });
-      } else if (role === "client") {
-        navigate("/client", { replace: true });
-      }
-    }
-  }, [user, role, roleLoading, navigate]);
+    const checkUserRole = async () => {
+      if (user) {
+        console.log('User detected, checking role:', user.id);
+        
+        // Fetch user role
+        const { data, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-  // Show loading only during initial auth check or when redirecting
+        console.log('Role data:', data, 'Error:', error);
+
+        if (data?.role === "admin") {
+          console.log('Redirecting to admin dashboard');
+          navigate("/admin", { replace: true });
+        } else if (data?.role === "client") {
+          console.log('Redirecting to client dashboard');
+          navigate("/client", { replace: true });
+        }
+      }
+    };
+
+    checkUserRole();
+  }, [user, navigate]);
+
+  // Show loading screen only during initial auth check
   if (authLoading) {
+    console.log('Auth loading state:', authLoading);
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Загрузка...</div>
       </div>
     );
   }
+
+  console.log('Rendering login form, user:', user);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
