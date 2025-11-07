@@ -13,6 +13,7 @@ import DoughnutChartCard from "@/components/dashboard/DoughnutChartCard";
 import { dummyClientDetails, generateFakeMetrics } from "@/utils/mockData";
 import { toast } from "sonner";
 import { z } from "zod";
+import { parsePhoneNumber } from 'libphonenumber-js';
 
 const clientDataSchema = z.object({
   data: z.string()
@@ -89,14 +90,30 @@ export default function AdminDashboard() {
                     <p className="text-xl font-light text-foreground">{client.phone}</p>
                   </div>
                 </div>
-                <a
-                  href={`https://wa.me/${client.phone.replace(/[^0-9+]/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-md transition transform hover:scale-105"
-                >
-                  <MessageSquare className="w-6 h-6" />
-                </a>
+                {(() => {
+                  try {
+                    const phoneNumber = parsePhoneNumber(client.phone, 'RU');
+                    if (phoneNumber.isValid()) {
+                      return (
+                        <a
+                          href={`https://wa.me/${phoneNumber.number}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-12 h-12 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-md transition transform hover:scale-105"
+                        >
+                          <MessageSquare className="w-6 h-6" />
+                        </a>
+                      );
+                    }
+                  } catch (error) {
+                    console.error('Invalid phone number:', error);
+                  }
+                  return (
+                    <div className="w-12 h-12 flex items-center justify-center bg-muted border border-border text-muted-foreground rounded-xl">
+                      <MessageSquare className="w-6 h-6" />
+                    </div>
+                  );
+                })()}
               </Card>
 
               <h3 className="text-2xl font-light mt-10 pt-5 border-t border-border">

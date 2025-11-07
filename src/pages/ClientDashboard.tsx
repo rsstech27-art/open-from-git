@@ -9,6 +9,7 @@ import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
 import DoughnutChartCard from "@/components/dashboard/DoughnutChartCard";
 import { dummyClientDetails, generateFakeMetrics } from "@/utils/mockData";
+import { parsePhoneNumber } from 'libphonenumber-js';
 
 const MOCK_CLIENT_ID = "client1";
 
@@ -41,15 +42,27 @@ export default function ClientDashboard() {
                 <span className="text-sm font-light text-green-300">Подключен</span>
               </div>
 
-              <a
-                href="https://wa.me/79990001122?text=Здравствуйте!%20Пишу%20вам%20по%20поводу%20ИИ-ассистента."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 mt-4 sm:mt-0 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-md transition transform hover:scale-105 w-fit"
-              >
-                <MessageSquare className="w-5 h-5" />
-                <span className="text-sm font-light">Связаться с менеджером</span>
-              </a>
+              {(() => {
+                try {
+                  const phoneNumber = parsePhoneNumber('+79990001122', 'RU');
+                  if (phoneNumber.isValid()) {
+                    return (
+                      <a
+                        href={`https://wa.me/${phoneNumber.number}?text=${encodeURIComponent('Здравствуйте! Пишу вам по поводу ИИ-ассистента.')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center space-x-2 mt-4 sm:mt-0 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-md transition transform hover:scale-105 w-fit"
+                      >
+                        <MessageSquare className="w-5 h-5" />
+                        <span className="text-sm font-light">Связаться с менеджером</span>
+                      </a>
+                    );
+                  }
+                } catch (error) {
+                  console.error('Invalid phone number:', error);
+                }
+                return null;
+              })()}
             </div>
 
             <Select value={period} onValueChange={setPeriod}>
