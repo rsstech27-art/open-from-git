@@ -10,24 +10,18 @@ export function useAuthRedirect() {
   const hasRedirected = useRef(false);
 
   useEffect(() => {
-    console.log('[useAuthRedirect] State:', { 
-      authLoading, 
-      roleLoading, 
-      hasUser: !!user, 
-      role,
-      hasRedirected: hasRedirected.current 
-    });
-    
     // Only redirect once and when both auth and role are loaded
     if (!authLoading && !roleLoading && user && role && !hasRedirected.current) {
-      console.log('[useAuthRedirect] Redirecting to:', role === 'admin' ? '/admin' : '/client');
       hasRedirected.current = true;
       
-      if (role === "admin") {
-        navigate("/admin", { replace: true });
-      } else if (role === "client") {
-        navigate("/client", { replace: true });
-      }
+      // Use setTimeout to ensure navigation happens after current render
+      setTimeout(() => {
+        if (role === "admin") {
+          navigate("/admin", { replace: true });
+        } else if (role === "client") {
+          navigate("/client", { replace: true });
+        }
+      }, 0);
     }
   }, [user, role, authLoading, roleLoading, navigate]);
 
