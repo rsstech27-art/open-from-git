@@ -202,26 +202,25 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <LineChartCard
                 title="Конверсия в запись"
-                labels={metrics.map((m) => m.date)}
-                data={metrics.map((m) => (m.conversion * 100))}
+                data={metrics.map((m) => ({ name: m.date, value: Number((m.conversion * 100).toFixed(1)) }))}
                 color="rgba(0, 200, 200, 1)"
               />
               <LineChartCard
                 title="Автономность (без админа)"
-                labels={metrics.map((m) => m.date)}
-                data={metrics.map((m) => (m.autonomy * 100))}
+                data={metrics.map((m) => ({ name: m.date, value: Number((m.autonomy * 100).toFixed(1)) }))}
                 color="rgba(138, 43, 226, 1)"
               />
               <BarChartCard
                 title="Финансовый эквивалент экономии"
-                labels={metrics.map((m) => m.date)}
-                data={metrics.map((m) => m.financial_equiv)}
+                data={metrics.map((m) => ({ name: m.date, value: m.financial_equiv }))}
                 color="rgba(255, 95, 109, 1)"
               />
               <DoughnutChartCard
                 title="Новые / Повторные клиенты"
-                labels={["Повторные", "Новые"]}
-                data={[latestMetric.retention_share * 100, (1 - latestMetric.retention_share) * 100]}
+                data={[
+                  { name: "Повторные", value: Number((latestMetric.retention_share * 100).toFixed(1)) },
+                  { name: "Новые", value: Number(((1 - latestMetric.retention_share) * 100).toFixed(1)) },
+                ]}
                 colors={["rgba(50, 205, 50, 1)", "rgba(255, 215, 0, 1)"]}
               />
             </div>

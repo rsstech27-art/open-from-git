@@ -1,79 +1,32 @@
 import { Card } from "@/components/ui/card";
-import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface BarChartCardProps {
   title: string;
-  labels: string[];
-  data: number[];
+  data: Array<{ name: string; value: number }>;
   color: string;
 }
 
-export default function BarChartCard({ title, labels, data, color }: BarChartCardProps) {
-  const chartData = {
-    labels,
-    datasets: [
-      {
-        label: title,
-        data,
-        backgroundColor: color,
-        borderRadius: 6,
-        barThickness: 16,
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: "rgba(255,255,255,0.1)",
-        },
-        ticks: {
-          color: "#E0E0E0",
-        },
-      },
-      x: {
-        grid: {
-          display: false,
-        },
-        ticks: {
-          color: "#E0E0E0",
-        },
-      },
-    },
-  };
-
+export default function BarChartCard({ title, data, color }: BarChartCardProps) {
   return (
     <Card className="bg-[hsl(var(--chart-bg))] text-[hsl(var(--chart-text))] p-6 border-0 shadow-lg">
       <p className="text-base font-light mb-4">{title}</p>
       <div className="h-64">
-        <Bar data={chartData} options={options} />
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+            <XAxis dataKey="name" stroke="#E0E0E0" />
+            <YAxis stroke="#E0E0E0" />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "hsl(var(--chart-bg))",
+                border: "1px solid hsl(var(--chart-border))",
+                borderRadius: "8px",
+              }}
+            />
+            <Bar dataKey="value" fill={color} radius={[6, 6, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </Card>
   );
