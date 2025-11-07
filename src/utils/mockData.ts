@@ -12,7 +12,6 @@ export interface ClientDetails {
   phone: string;
   manager: string;
   login: string;
-  password: string;
   status: "active" | "paused" | "inactive";
 }
 
@@ -23,7 +22,6 @@ export const dummyClientDetails: Record<string, ClientDetails> = {
     phone: "+7 (999) 123-45-67",
     manager: "Анна Смирнова",
     login: "client1@example.com",
-    password: "demo123",
     status: "active",
   },
   client2: {
@@ -32,7 +30,6 @@ export const dummyClientDetails: Record<string, ClientDetails> = {
     phone: "+7 (999) 765-43-21",
     manager: "Игорь Петров",
     login: "client2@example.com",
-    password: "demo456",
     status: "active",
   },
 };
