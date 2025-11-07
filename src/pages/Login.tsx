@@ -30,7 +30,7 @@ export default function Login() {
   }, [user, role, roleLoading, navigate]);
 
   // Show loading screen while checking authentication
-  if (authLoading || (user && roleLoading)) {
+  if (authLoading || roleLoading || user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Загрузка...</div>
