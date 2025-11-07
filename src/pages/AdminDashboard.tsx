@@ -12,12 +12,21 @@ import BarChartCard from "@/components/dashboard/BarChartCard";
 import DoughnutChartCard from "@/components/dashboard/DoughnutChartCard";
 import { dummyClientDetails, generateFakeMetrics } from "@/utils/mockData";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const clientDataSchema = z.object({
+  data: z.string()
+    .trim()
+    .min(1, "Данные не могут быть пустыми")
+    .max(5000, "Данные не должны превышать 5000 символов")
+});
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [selectedClient, setSelectedClient] = useState("client1");
   const [period, setPeriod] = useState("month");
   const [showClientCard, setShowClientCard] = useState(false);
+  const [clientData, setClientData] = useState("");
 
   const client = dummyClientDetails[selectedClient];
   const metrics = generateFakeMetrics(period);
@@ -25,7 +34,16 @@ export default function AdminDashboard() {
 
   const handleSaveData = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const result = clientDataSchema.safeParse({ data: clientData });
+    
+    if (!result.success) {
+      toast.error(result.error.errors[0].message);
+      return;
+    }
+    
     toast.success("Данные сохранены");
+    setClientData("");
   };
 
   if (showClientCard) {
@@ -90,9 +108,8 @@ export default function AdminDashboard() {
                   <p className="text-sm text-foreground/70">Логин (Email):</p>
                   <p className="text-lg font-mono text-foreground">{client.login}</p>
                 </div>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                  <p className="text-sm text-foreground/70">Пароль:</p>
-                  <p className="text-lg font-mono text-foreground">{client.password}</p>
+                <div className="text-sm text-muted-foreground mt-4 p-3 bg-background rounded-lg border border-border">
+                  <p>Для сброса пароля используйте функцию восстановления пароля в системе аутентификации.</p>
                 </div>
               </Card>
             </div>
@@ -236,7 +253,13 @@ export default function AdminDashboard() {
               className="bg-muted border text-foreground mb-4 rounded-lg"
               rows={8}
               placeholder="Вставьте сюда данные клиента..."
+              value={clientData}
+              onChange={(e) => setClientData(e.target.value)}
+              maxLength={5000}
             />
+            <p className="text-sm text-muted-foreground mb-4">
+              {clientData.length}/5000 символов
+            </p>
             <Button type="submit" className="w-full rounded-lg" variant="secondary">
               Сохранить изменения
             </Button>
