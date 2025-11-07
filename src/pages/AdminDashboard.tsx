@@ -41,13 +41,13 @@ export default function AdminDashboard() {
             Вернуться к дашборду
           </Button>
 
-          <Card className="bg-[hsl(var(--chart-bg))] text-[hsl(var(--chart-text))] p-8">
-            <h2 className="text-3xl font-light mb-8 pb-4 border-b border-[hsl(var(--chart-border))]">
+          <Card className="bg-card text-foreground p-8 rounded-2xl shadow-lg">
+            <h2 className="text-3xl font-light mb-8 pb-4 border-b border-border">
               Карточка клиента
             </h2>
 
             <div className="space-y-6">
-              <Card className="bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] p-4 flex items-start space-x-4">
+              <Card className="bg-muted border p-4 flex items-start space-x-4 rounded-xl">
                 <Users className="w-8 h-8 text-primary" />
                 <div>
                   <p className="text-sm text-foreground/70">Закрепленный менеджер</p>
@@ -55,7 +55,7 @@ export default function AdminDashboard() {
                 </div>
               </Card>
 
-              <Card className="bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] p-4 flex items-start space-x-4">
+              <Card className="bg-muted border p-4 flex items-start space-x-4 rounded-xl">
                 <MessageSquare className="w-8 h-8 text-primary" />
                 <div>
                   <p className="text-sm text-foreground/70">Название компании</p>
@@ -63,7 +63,7 @@ export default function AdminDashboard() {
                 </div>
               </Card>
 
-              <Card className="bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] p-4 flex items-center justify-between">
+              <Card className="bg-muted border p-4 flex items-center justify-between rounded-xl">
                 <div className="flex items-center space-x-4">
                   <MessageSquare className="w-8 h-8 text-green-500" />
                   <div>
@@ -81,11 +81,11 @@ export default function AdminDashboard() {
                 </a>
               </Card>
 
-              <h3 className="text-2xl font-light mt-10 pt-5 border-t border-[hsl(var(--chart-border))]">
+              <h3 className="text-2xl font-light mt-10 pt-5 border-t border-border">
                 Доступ в личный кабинет
               </h3>
 
-              <Card className="bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] p-6 space-y-4">
+              <Card className="bg-muted border p-6 space-y-4 rounded-xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between">
                   <p className="text-sm text-foreground/70">Логин (Email):</p>
                   <p className="text-lg font-mono text-foreground">{client.login}</p>
@@ -113,15 +113,15 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-[hsl(var(--chart-bg))] text-[hsl(var(--chart-text))] p-6 lg:col-span-1">
-            <h3 className="text-xl font-light mb-4 pb-3 border-b border-[hsl(var(--chart-border))]">
+          <Card className="bg-card text-foreground p-6 lg:col-span-1 rounded-2xl shadow-lg">
+            <h3 className="text-xl font-light mb-4 pb-3 border-b border-border">
               Выбор клиента
             </h3>
             <div className="space-y-4">
               <div>
                 <Label className="text-muted-foreground mb-2 block">Компания</Label>
                 <Select value={selectedClient} onValueChange={setSelectedClient}>
-                  <SelectTrigger className="bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] text-white">
+                  <SelectTrigger className="bg-muted border text-foreground rounded-lg">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -137,7 +137,7 @@ export default function AdminDashboard() {
               <div>
                 <Label className="text-muted-foreground mb-2 block">Статус ИИ</Label>
                 <Select defaultValue="active">
-                  <SelectTrigger className="bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] text-white">
+                  <SelectTrigger className="bg-muted border text-foreground rounded-lg">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -151,7 +151,7 @@ export default function AdminDashboard() {
           </Card>
 
           <div className="lg:col-span-3 space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-[hsl(var(--chart-border))]">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-border">
               <h2
                 className="text-3xl font-light text-foreground mb-4 md:mb-0 hover:text-primary transition cursor-pointer"
                 onClick={() => setShowClientCard(true)}
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
               </h2>
 
               <Select value={period} onValueChange={setPeriod}>
-                <SelectTrigger className="w-48 bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] text-white">
+                <SelectTrigger className="w-48 bg-muted border text-foreground rounded-lg">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -203,17 +203,17 @@ export default function AdminDashboard() {
               <LineChartCard
                 title="Конверсия в запись"
                 data={metrics.map((m) => ({ name: m.date, value: Number((m.conversion * 100).toFixed(1)) }))}
-                color="rgba(0, 200, 200, 1)"
+                color="hsl(189 94% 43%)"
               />
               <LineChartCard
                 title="Автономность (без админа)"
                 data={metrics.map((m) => ({ name: m.date, value: Number((m.autonomy * 100).toFixed(1)) }))}
-                color="rgba(138, 43, 226, 1)"
+                color="hsl(280 70% 60%)"
               />
               <BarChartCard
                 title="Финансовый эквивалент экономии"
                 data={metrics.map((m) => ({ name: m.date, value: m.financial_equiv }))}
-                color="rgba(255, 95, 109, 1)"
+                color="hsl(189 94% 43%)"
               />
               <DoughnutChartCard
                 title="Новые / Повторные клиенты"
@@ -221,23 +221,23 @@ export default function AdminDashboard() {
                   { name: "Повторные", value: Number((latestMetric.retention_share * 100).toFixed(1)) },
                   { name: "Новые", value: Number(((1 - latestMetric.retention_share) * 100).toFixed(1)) },
                 ]}
-                colors={["rgba(50, 205, 50, 1)", "rgba(255, 215, 0, 1)"]}
+                colors={["hsl(280 70% 60%)", "hsl(189 94% 43%)"]}
               />
             </div>
           </div>
         </div>
 
-        <Card className="bg-[hsl(var(--chart-bg))] text-[hsl(var(--chart-text))] p-6">
-          <h3 className="text-xl font-light mb-4 pb-3 border-b border-[hsl(var(--chart-border))]">
+        <Card className="bg-card text-foreground p-6 rounded-2xl shadow-lg">
+          <h3 className="text-xl font-light mb-4 pb-3 border-b border-border">
             Внесение данных клиента за период
           </h3>
           <form onSubmit={handleSaveData}>
             <Textarea
-              className="bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] text-white mb-4"
+              className="bg-muted border text-foreground mb-4 rounded-lg"
               rows={8}
               placeholder="Вставьте сюда данные клиента..."
             />
-            <Button type="submit" className="w-full" variant="secondary">
+            <Button type="submit" className="w-full rounded-lg" variant="secondary">
               Сохранить изменения
             </Button>
           </form>

@@ -9,7 +9,7 @@ interface DoughnutChartCardProps {
 
 export default function DoughnutChartCard({ title, data, colors }: DoughnutChartCardProps) {
   return (
-    <Card className="bg-[hsl(var(--chart-bg))] text-[hsl(var(--chart-text))] p-6 border-0 shadow-lg">
+    <Card className="bg-card text-foreground p-6 shadow-lg rounded-2xl">
       <p className="text-base font-light mb-4">{title}</p>
       <div className="h-72 flex items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">
@@ -28,7 +28,7 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
               ))}
             </Pie>
             <Legend
-              wrapperStyle={{ color: "#E0E0E0" }}
+              wrapperStyle={{ color: "hsl(var(--foreground))" }}
               iconType="circle"
             />
           </PieChart>

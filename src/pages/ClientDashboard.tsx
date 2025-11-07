@@ -31,9 +31,9 @@ export default function ClientDashboard() {
         </div>
 
         <div className="space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-[hsl(var(--chart-border))]">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-border">
             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 mb-4 md:mb-0">
-              <h2 className="text-3xl font-light text-[hsl(var(--chart-text))] mb-2 sm:mb-0">
+              <h2 className="text-3xl font-light text-foreground mb-2 sm:mb-0">
                 {client.name}
               </h2>
               <div className="flex items-center space-x-2 px-3 py-1 bg-green-500/10 rounded-full border border-green-500/50 w-fit">
@@ -53,7 +53,7 @@ export default function ClientDashboard() {
             </div>
 
             <Select value={period} onValueChange={setPeriod}>
-              <SelectTrigger className="w-48 bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] text-white">
+              <SelectTrigger className="w-48 bg-muted border text-foreground rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -96,17 +96,17 @@ export default function ClientDashboard() {
             <LineChartCard
               title="Конверсия в запись"
               data={metrics.map((m) => ({ name: m.date, value: Number((m.conversion * 100).toFixed(1)) }))}
-              color="rgba(0, 200, 200, 1)"
+              color="hsl(189 94% 43%)"
             />
             <LineChartCard
               title="Автономность (без админа)"
               data={metrics.map((m) => ({ name: m.date, value: Number((m.autonomy * 100).toFixed(1)) }))}
-              color="rgba(138, 43, 226, 1)"
+              color="hsl(280 70% 60%)"
             />
             <BarChartCard
               title="Финансовый эквивалент экономии"
               data={metrics.map((m) => ({ name: m.date, value: m.financial_equiv }))}
-              color="rgba(255, 95, 109, 1)"
+              color="hsl(189 94% 43%)"
             />
             <DoughnutChartCard
               title="Новые / Повторные клиенты"
@@ -114,7 +114,7 @@ export default function ClientDashboard() {
                 { name: "Повторные", value: Number((latestMetric.retention_share * 100).toFixed(1)) },
                 { name: "Новые", value: Number(((1 - latestMetric.retention_share) * 100).toFixed(1)) },
               ]}
-              colors={["rgba(50, 205, 50, 1)", "rgba(255, 215, 0, 1)"]}
+              colors={["hsl(280 70% 60%)", "hsl(189 94% 43%)"]}
             />
           </div>
         </div>

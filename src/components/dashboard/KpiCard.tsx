@@ -17,7 +17,7 @@ const gradients = {
 
 export default function KpiCard({ title, value, icon: Icon, gradient }: KpiCardProps) {
   return (
-    <Card className={`${gradients[gradient]} text-white p-6 relative overflow-hidden border-0 shadow-lg`}>
+    <Card className={`${gradients[gradient]} text-white p-6 relative overflow-hidden shadow-xl rounded-2xl border-0`}>
       <div className="absolute top-0 left-0 w-full h-full opacity-10">
         <div className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-radial-gradient" />
       </div>

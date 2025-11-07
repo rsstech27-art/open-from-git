@@ -9,22 +9,23 @@ interface LineChartCardProps {
 
 export default function LineChartCard({ title, data, color }: LineChartCardProps) {
   return (
-    <Card className="bg-[hsl(var(--chart-bg))] text-[hsl(var(--chart-text))] p-6 border-0 shadow-lg">
+    <Card className="bg-card text-foreground p-6 border shadow-lg rounded-2xl">
       <p className="text-base font-light mb-4">{title}</p>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-            <XAxis dataKey="name" stroke="#E0E0E0" />
-            <YAxis stroke="#E0E0E0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+            <YAxis stroke="hsl(var(--muted-foreground))" />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(var(--chart-bg))",
-                border: "1px solid hsl(var(--chart-border))",
-                borderRadius: "8px",
+                backgroundColor: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "12px",
+                color: "hsl(var(--foreground))",
               }}
             />
-            <Line type="monotone" dataKey="value" stroke={color} strokeWidth={3} dot={{ fill: color }} />
+            <Line type="monotone" dataKey="value" stroke={color} strokeWidth={3} dot={{ fill: color, r: 5 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

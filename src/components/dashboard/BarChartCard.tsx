@@ -9,22 +9,23 @@ interface BarChartCardProps {
 
 export default function BarChartCard({ title, data, color }: BarChartCardProps) {
   return (
-    <Card className="bg-[hsl(var(--chart-bg))] text-[hsl(var(--chart-text))] p-6 border-0 shadow-lg">
+    <Card className="bg-card text-foreground p-6 shadow-lg rounded-2xl">
       <p className="text-base font-light mb-4">{title}</p>
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-            <XAxis dataKey="name" stroke="#E0E0E0" />
-            <YAxis stroke="#E0E0E0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+            <YAxis stroke="hsl(var(--muted-foreground))" />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(var(--chart-bg))",
-                border: "1px solid hsl(var(--chart-border))",
-                borderRadius: "8px",
+                backgroundColor: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: "12px",
+                color: "hsl(var(--foreground))",
               }}
             />
-            <Bar dataKey="value" fill={color} radius={[6, 6, 0, 0]} />
+            <Bar dataKey="value" fill={color} radius={[8, 8, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
