@@ -29,17 +29,8 @@ export default function Login() {
     }
   }, [user, role, roleLoading, navigate]);
 
-  // Show loading while checking auth or redirecting authenticated users
-  if (authLoading || (user && roleLoading)) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Загрузка...</div>
-      </div>
-    );
-  }
-
-  // If user is authenticated and role is loaded, show loading during redirect
-  if (user && role) {
+  // Show loading only during initial auth check or when redirecting
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Загрузка...</div>
