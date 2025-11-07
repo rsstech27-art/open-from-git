@@ -10,36 +10,20 @@ export function useAuth() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    let mounted = true;
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
-    // Check for existing session
-    const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (mounted) {
-        console.log('Initial session:', session ? 'Logged in' : 'Not logged in');
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    };
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
 
-    initAuth();
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        if (mounted) {
-          console.log('Auth changed:', _event);
-          setSession(session);
-          setUser(session?.user ?? null);
-        }
-      }
-    );
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
