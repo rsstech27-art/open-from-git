@@ -1,27 +1,75 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-
-type LoginType = "admin" | "client";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Login() {
-  const [loginType, setLoginType] = useState<LoginType>("admin");
   const [isRegister, setIsRegister] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signIn, signUp, user } = useAuth();
+  const { role, loading: roleLoading } = useUserRole();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (user && !roleLoading) {
+      if (role === "admin") {
+        navigate("/admin");
+      } else if (role === "client") {
+        navigate("/client");
+      }
+    }
+  }, [user, role, roleLoading, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    toast.success("Вход выполнен в демо-режиме");
-    
-    if (loginType === "admin") {
-      navigate("/admin");
-    } else {
-      navigate("/client");
+    setLoading(true);
+
+    try {
+      if (isRegister) {
+        if (!fullName.trim()) {
+          toast.error("Пожалуйста, укажите ваше имя");
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await signUp(email, password, fullName);
+        
+        if (error) {
+          if (error.message.includes("already registered")) {
+            toast.error("Этот email уже зарегистрирован");
+          } else {
+            toast.error(error.message);
+          }
+        } else {
+          toast.success("Регистрация успешна! Укажите вашу роль.");
+          setIsRegister(false);
+        }
+      } else {
+        const { error } = await signIn(email, password);
+        
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            toast.error("Неверный email или пароль");
+          } else {
+            toast.error(error.message);
+          }
+        } else {
+          toast.success("Вход выполнен успешно!");
+        }
+      }
+    } catch (error) {
+      toast.error("Произошла ошибка. Попробуйте снова.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -37,26 +85,21 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant={loginType === "admin" ? "default" : "outline"}
-            className="flex-1"
-            onClick={() => setLoginType("admin")}
-          >
-            Администратор
-          </Button>
-          <Button
-            type="button"
-            variant={loginType === "client" ? "default" : "outline"}
-            className="flex-1"
-            onClick={() => setLoginType("client")}
-          >
-            Клиент
-          </Button>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
+          {isRegister && (
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Полное имя</Label>
+              <Input
+                id="fullName"
+                type="text"
+                required
+                placeholder="Иван Иванов"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -64,6 +107,8 @@ export default function Login() {
               type="email"
               required
               placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -74,23 +119,14 @@ export default function Login() {
               type="password"
               required
               placeholder="••••••••"
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
-          {isRegister && (
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Подтверждение пароля</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                required
-                placeholder="••••••••"
-              />
-            </div>
-          )}
-
-          <Button type="submit" className="w-full">
-            {isRegister ? "Зарегистрироваться" : "Войти"}
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Загрузка..." : isRegister ? "Зарегистрироваться" : "Войти"}
           </Button>
         </form>
 
