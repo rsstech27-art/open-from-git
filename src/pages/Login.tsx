@@ -29,8 +29,8 @@ export default function Login() {
     }
   }, [user, role, roleLoading, navigate]);
 
-  // Show loading screen while checking authentication
-  if (authLoading) {
+  // Show loading while checking auth or redirecting authenticated users
+  if (authLoading || (user && roleLoading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Загрузка...</div>
@@ -38,8 +38,8 @@ export default function Login() {
     );
   }
 
-  // Don't show login form if user is authenticated (prevents flash)
-  if (user) {
+  // If user is authenticated and role is loaded, show loading during redirect
+  if (user && role) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Загрузка...</div>
