@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -14,34 +13,11 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [redirected, setRedirected] = useState(false);
-  const navigate = useNavigate();
-  const { signIn, signUp, user, loading: authLoading } = useAuth();
+  const { signIn, signUp } = useAuth();
+  const { loading: redirecting } = useAuthRedirect();
 
-  useEffect(() => {
-    if (!authLoading && user && !redirected) {
-      setRedirected(true);
-      
-      const checkUserRole = async () => {
-        const { data } = await supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", user.id)
-          .maybeSingle();
-
-        if (data?.role === "admin") {
-          navigate("/admin", { replace: true });
-        } else if (data?.role === "client") {
-          navigate("/client", { replace: true });
-        }
-      };
-
-      checkUserRole();
-    }
-  }, [user, authLoading, navigate, redirected]);
-
-  // Show loading screen only during initial auth check
-  if (authLoading) {
+  // Show loading screen during redirect
+  if (redirecting) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Загрузка...</div>
