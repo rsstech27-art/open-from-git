@@ -20,13 +20,11 @@ export default function Login() {
   const { role, loading: roleLoading } = useUserRole();
 
   useEffect(() => {
-    if (user && !roleLoading) {
+    if (user && !roleLoading && role) {
       if (role === "admin") {
         navigate("/admin");
       } else if (role === "client") {
         navigate("/client");
-      } else if (role === null) {
-        navigate("/role-selection");
       }
     }
   }, [user, role, roleLoading, navigate]);
@@ -52,7 +50,7 @@ export default function Login() {
             toast.error(error.message);
           }
         } else {
-          toast.success("Регистрация успешна! Укажите вашу роль.");
+          toast.success("Регистрация успешна! Войдите в систему.");
           setIsRegister(false);
         }
       } else {
