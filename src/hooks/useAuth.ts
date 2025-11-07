@@ -10,18 +10,23 @@ export function useAuth() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    let isInitialized = false;
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      isInitialized = true;
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Only update if already initialized to avoid double updates
+      if (isInitialized) {
+        setSession(session);
+        setUser(session?.user ?? null);
+      }
     });
 
     return () => subscription.unsubscribe();

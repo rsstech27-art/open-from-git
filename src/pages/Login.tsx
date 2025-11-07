@@ -14,11 +14,14 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [redirected, setRedirected] = useState(false);
   const navigate = useNavigate();
   const { signIn, signUp, user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && !redirected) {
+      setRedirected(true);
+      
       const checkUserRole = async () => {
         const { data } = await supabase
           .from("user_roles")
@@ -35,7 +38,7 @@ export default function Login() {
 
       checkUserRole();
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, redirected]);
 
   // Show loading screen only during initial auth check
   if (authLoading) {
