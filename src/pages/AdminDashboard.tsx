@@ -48,18 +48,18 @@ export default function AdminDashboard() {
 
             <div className="space-y-6">
               <Card className="bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] p-4 flex items-start space-x-4">
-                <Users className="w-8 h-8 text-muted-foreground" />
+                <Users className="w-8 h-8 text-primary" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Закрепленный менеджер</p>
-                  <p className="text-xl font-light">{client.manager}</p>
+                  <p className="text-sm text-foreground/70">Закрепленный менеджер</p>
+                  <p className="text-xl font-light text-foreground">{client.manager}</p>
                 </div>
               </Card>
 
               <Card className="bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] p-4 flex items-start space-x-4">
                 <MessageSquare className="w-8 h-8 text-primary" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Название компании</p>
-                  <p className="text-xl font-light">{client.name}</p>
+                  <p className="text-sm text-foreground/70">Название компании</p>
+                  <p className="text-xl font-light text-foreground">{client.name}</p>
                 </div>
               </Card>
 
@@ -67,8 +67,8 @@ export default function AdminDashboard() {
                 <div className="flex items-center space-x-4">
                   <MessageSquare className="w-8 h-8 text-green-500" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Контактный телефон</p>
-                    <p className="text-xl font-light">{client.phone}</p>
+                    <p className="text-sm text-foreground/70">Контактный телефон</p>
+                    <p className="text-xl font-light text-foreground">{client.phone}</p>
                   </div>
                 </div>
                 <a
@@ -87,12 +87,12 @@ export default function AdminDashboard() {
 
               <Card className="bg-[hsl(var(--chart-bg))] border-[hsl(var(--chart-border))] p-6 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Логин (Email):</p>
-                  <p className="text-lg font-mono">{client.login}</p>
+                  <p className="text-sm text-foreground/70">Логин (Email):</p>
+                  <p className="text-lg font-mono text-foreground">{client.login}</p>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                  <p className="text-sm text-muted-foreground">Пароль:</p>
-                  <p className="text-lg font-mono">{client.password}</p>
+                  <p className="text-sm text-foreground/70">Пароль:</p>
+                  <p className="text-lg font-mono text-foreground">{client.password}</p>
                 </div>
               </Card>
             </div>
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
           <div className="lg:col-span-3 space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-[hsl(var(--chart-border))]">
               <h2
-                className="text-3xl font-light text-[hsl(var(--chart-text))] mb-4 md:mb-0 hover:text-primary transition cursor-pointer"
+                className="text-3xl font-light text-foreground mb-4 md:mb-0 hover:text-primary transition cursor-pointer"
                 onClick={() => setShowClientCard(true)}
               >
                 {client.name}
