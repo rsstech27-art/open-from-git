@@ -42,14 +42,12 @@ All colors MUST be HSL.
     --chart-text: 0 0% 95%;
     --chart-border: 252 25% 25%;
 
-    --gradient-purple-start: 280 70% 60%;
-    --gradient-purple-end: 310 80% 55%;
+    --gradient-blue-start: 220 80% 55%;
+    --gradient-blue-end: 230 75% 60%;
     --gradient-cyan-start: 189 94% 43%;
     --gradient-cyan-end: 180 90% 50%;
-    --gradient-salmon-start: 330 85% 65%;
-    --gradient-salmon-end: 340 90% 60%;
-    --gradient-green-start: 160 65% 55%;
-    --gradient-green-end: 170 70% 50%;
+    --gradient-lime-start: 100 70% 60%;
+    --gradient-lime-end: 110 75% 55%;
   }
 
   .dark {
@@ -128,10 +126,9 @@ All colors MUST be HSL.
   .animated-gradient-bg {
     background: linear-gradient(
       -45deg,
-      hsl(var(--gradient-purple-start)),
+      hsl(var(--gradient-blue-start)),
       hsl(var(--gradient-cyan-start)),
-      hsl(var(--gradient-salmon-start)),
-      hsl(var(--gradient-green-start))
+      hsl(var(--gradient-lime-start))
     );
     background-size: 400% 400%;
     animation: gradient-animation 15s ease infinite;
