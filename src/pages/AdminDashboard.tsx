@@ -681,10 +681,14 @@ export default function AdminDashboard() {
                   />
                   <BarChartCard
                     title="Экономия времени (часы)"
-                    data={metrics.map((m) => ({ 
-                      name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                      value: m.time_saved_hours || 0
-                    }))}
+                    data={metrics.map((m) => {
+                      const date = new Date(m.date);
+                      const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                      return {
+                        name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                        value: m.time_saved_hours || 0
+                      };
+                    })}
                     color="hsl(189 94% 43%)"
                   />
                 </>
@@ -700,7 +704,7 @@ export default function AdminDashboard() {
                   { name: "Подтверждено", value: aggregatedMetric.confirmed_appointments || 0 },
                   { name: "Всего диалогов", value: (aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0) - (aggregatedMetric.confirmed_appointments || 0) },
                 ]}
-                colors={["hsl(142 71% 45%)", "hsl(280 70% 60%)"]}
+                colors={["hsl(160 65% 55%)", "hsl(280 70% 60%)"]}
               />
               <DoughnutChartCard
                 title="Записи по времени"
@@ -708,7 +712,7 @@ export default function AdminDashboard() {
                   { name: "Рабочее время", value: aggregatedMetric.business_hours_appointments },
                   { name: "Нерабочее время", value: aggregatedMetric.non_business_hours_appointments },
                 ]}
-                colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)"]}
+                colors={["hsl(189 94% 43%)", "hsl(330 85% 65%)"]}
               />
               <DoughnutChartCard
                 title="Длительность диалогов"
@@ -717,7 +721,7 @@ export default function AdminDashboard() {
                   { name: "Средние", value: aggregatedMetric.medium_dialogs },
                   { name: "Длинные", value: aggregatedMetric.long_dialogs },
                 ]}
-                colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)", "hsl(0 70% 60%)"]}
+                colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
               />
             </div>
           </div>

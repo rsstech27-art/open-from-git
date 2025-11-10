@@ -244,10 +244,14 @@ export default function ClientDashboard() {
             />
             <BarChartCard
               title="Экономия времени (часы)"
-              data={metrics.map((m) => ({ 
-                name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                value: m.time_saved_hours || 0
-              }))}
+              data={metrics.map((m) => {
+                const date = new Date(m.date);
+                const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                return {
+                  name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                  value: m.time_saved_hours || 0
+                };
+              })}
               color="hsl(189 94% 43%)"
             />
             <DoughnutChartCard
@@ -256,7 +260,7 @@ export default function ClientDashboard() {
                 { name: "Подтверждено", value: aggregatedMetric.confirmed_appointments || 0 },
                 { name: "Всего диалогов", value: Math.max(0, 100 - (aggregatedMetric.confirmed_appointments || 0)) },
               ]}
-              colors={["hsl(142 71% 45%)", "hsl(280 70% 60%)"]}
+              colors={["hsl(160 65% 55%)", "hsl(280 70% 60%)"]}
             />
           </div>
         </div>
