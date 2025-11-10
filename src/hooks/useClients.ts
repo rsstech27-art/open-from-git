@@ -6,6 +6,7 @@ export interface Client {
   id: string;
   user_id: string;
   company_name: string;
+  client_name: string | null;
   manager_name: string | null;
   phone: string | null;
   status: string | null;
@@ -96,7 +97,7 @@ export function useCreateClient() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newClient: { company_name: string; manager_name: string; phone: string; email?: string }) => {
+    mutationFn: async (newClient: { company_name: string; client_name: string; manager_name: string; phone: string; email?: string }) => {
       // Create a new user account for the client if email provided
       if (newClient.email) {
         const tempPassword = Math.random().toString(36).slice(-8);
@@ -106,7 +107,7 @@ export function useCreateClient() {
           password: tempPassword,
           options: {
             data: {
-              full_name: newClient.manager_name
+              full_name: newClient.client_name
             }
           }
         });
@@ -119,6 +120,7 @@ export function useCreateClient() {
           .from("clients")
           .insert({
             company_name: newClient.company_name,
+            client_name: newClient.client_name,
             manager_name: newClient.manager_name,
             phone: newClient.phone,
             user_id: authData.user.id,
@@ -138,6 +140,7 @@ export function useCreateClient() {
           .from("clients")
           .insert({
             company_name: newClient.company_name,
+            client_name: newClient.client_name,
             manager_name: newClient.manager_name,
             phone: newClient.phone,
             user_id: user.id,

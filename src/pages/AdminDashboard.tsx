@@ -30,6 +30,10 @@ const newClientSchema = z.object({
     .trim()
     .min(1, "Название компании обязательно")
     .max(100, "Название не должно превышать 100 символов"),
+  clientName: z.string()
+    .trim()
+    .min(1, "Имя клиента обязательно")
+    .max(100, "Имя не должно превышать 100 символов"),
   managerName: z.string()
     .trim()
     .min(1, "Имя менеджера обязательно")
@@ -49,6 +53,7 @@ export default function AdminDashboard() {
   const [clientData, setClientData] = useState("");
   const [aiStatus, setAiStatus] = useState("active");
   const [newCompanyName, setNewCompanyName] = useState("");
+  const [newClientName, setNewClientName] = useState("");
   const [newManagerName, setNewManagerName] = useState("");
   const [newPhone, setNewPhone] = useState("");
 
@@ -107,6 +112,7 @@ export default function AdminDashboard() {
     
     const result = newClientSchema.safeParse({
       companyName: newCompanyName,
+      clientName: newClientName,
       managerName: newManagerName,
       phone: newPhone
     });
@@ -118,11 +124,13 @@ export default function AdminDashboard() {
 
     await createClient.mutateAsync({
       company_name: newCompanyName,
+      client_name: newClientName,
       manager_name: newManagerName,
       phone: newPhone
     });
     
     setNewCompanyName("");
+    setNewClientName("");
     setNewManagerName("");
     setNewPhone("");
     setShowCreateForm(false);
@@ -198,12 +206,24 @@ export default function AdminDashboard() {
               </div>
 
               <div>
+                <Label htmlFor="clientName">Имя клиента</Label>
+                <Input
+                  id="clientName"
+                  value={newClientName}
+                  onChange={(e) => setNewClientName(e.target.value)}
+                  placeholder="Иван Иванов"
+                  className="mt-2"
+                  maxLength={100}
+                />
+              </div>
+
+              <div>
                 <Label htmlFor="managerName">Имя менеджера</Label>
                 <Input
                   id="managerName"
                   value={newManagerName}
                   onChange={(e) => setNewManagerName(e.target.value)}
-                  placeholder="Иван Иванов"
+                  placeholder="Петр Петров"
                   className="mt-2"
                   maxLength={100}
                 />
@@ -297,8 +317,8 @@ export default function AdminDashboard() {
               <Card className="bg-muted border p-4 flex items-start space-x-4 rounded-xl">
                 <Users className="w-8 h-8 text-primary" />
                 <div>
-                  <p className="text-sm text-foreground/70">Имя менеджера</p>
-                  <p className="text-xl font-light text-foreground">{selectedClient?.manager_name || "Не указано"}</p>
+                  <p className="text-sm text-foreground/70">Имя клиента</p>
+                  <p className="text-xl font-light text-foreground">{selectedClient?.client_name || "Не указано"}</p>
                 </div>
               </Card>
 
