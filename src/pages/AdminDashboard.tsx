@@ -294,6 +294,14 @@ export default function AdminDashboard() {
                 </div>
               </Card>
 
+              <Card className="bg-muted border p-4 flex items-start space-x-4 rounded-xl">
+                <Users className="w-8 h-8 text-primary" />
+                <div>
+                  <p className="text-sm text-foreground/70">Имя менеджера</p>
+                  <p className="text-xl font-light text-foreground">{selectedClient?.manager_name || "Не указано"}</p>
+                </div>
+              </Card>
+
               <Card className="bg-muted border p-4 rounded-xl">
                 <div className="flex items-start space-x-4 mb-4">
                   <MessageSquare className="w-8 h-8 text-green-500" />
