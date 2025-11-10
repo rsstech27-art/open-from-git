@@ -682,7 +682,8 @@ export default function AdminDashboard() {
                   <BarChartCard
                     title="Экономия времени (часы)"
                     data={metrics.map((m) => {
-                      const date = new Date(m.date);
+                      const [year, month] = (m.period_type || '').split('-');
+                      const date = new Date(parseInt(year), parseInt(month) - 1);
                       const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
                       return {
                         name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
