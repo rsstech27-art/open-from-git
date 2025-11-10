@@ -8,6 +8,17 @@ interface BarChartCardProps {
 }
 
 export default function BarChartCard({ title, data, color }: BarChartCardProps) {
+  if (!data || data.length === 0) {
+    return (
+      <Card className="bg-card text-foreground p-6 shadow-lg rounded-2xl">
+        <p className="text-base font-light mb-4">{title}</p>
+        <div className="h-64 flex items-center justify-center">
+          <p className="text-muted-foreground">Нет данных для отображения</p>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <Card className="bg-card text-foreground p-6 shadow-lg rounded-2xl">
       <p className="text-base font-light mb-4">{title}</p>
