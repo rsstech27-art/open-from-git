@@ -122,7 +122,7 @@ export default function AdminDashboard() {
     const conversionMatch = data.match(/конверси[яи][\s:]+(\d+[.,]?\d*)/i);
     const autonomyMatch = data.match(/автономност[ьи][\s:]+(\d+[.,]?\d*)/i);
     const timeSavedMatch = data.match(/эконом[иія]+[\s:]+(\d+)/i);
-    const confirmedAppointmentsMatch = data.match(/подтвержд[ыхе]+[\s:]+(\d+)/i);
+    const confirmedAppointmentsMatch = data.match(/(?:подтвержд[ыхе]+|запис[ьияе]+)[\s:]+(\d+)/i);
     const satisfactionMatch = data.match(/удовлетворенност[ьи][\s:]+(\d+[.,]?\d*)/i);
     const businessHoursMatch = data.match(/рабоч[иеа]+\s+врем[яи]+[\s:]+(\d+)/i);
     const nonBusinessHoursMatch = data.match(/нерабоч[иеа]+\s+врем[яи]+[\s:]+(\d+)/i);
