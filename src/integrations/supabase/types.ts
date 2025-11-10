@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       clients: {
         Row: {
+          ai_status: string | null
           client_name: string | null
           company_name: string
           created_at: string
@@ -28,6 +29,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_status?: string | null
           client_name?: string | null
           company_name: string
           created_at?: string
@@ -40,6 +42,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_status?: string | null
           client_name?: string | null
           company_name?: string
           created_at?: string

@@ -144,9 +144,31 @@ export default function ClientDashboard() {
               <h2 className="text-3xl font-light text-foreground mb-2 sm:mb-0">
                 {client.company_name}
               </h2>
-              <div className="flex items-center space-x-2 px-3 py-1 bg-green-500/10 rounded-full border border-green-500/50 w-fit">
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-sm font-light text-green-300">Подключен</span>
+
+              {/* AI Status Badge */}
+              <div className={`flex items-center space-x-2 px-3 py-1 rounded-full border w-fit ${
+                client.ai_status === 'active' 
+                  ? 'bg-green-500/10 border-green-500/50' 
+                  : client.ai_status === 'paused'
+                  ? 'bg-yellow-500/10 border-yellow-500/50'
+                  : 'bg-red-500/10 border-red-500/50'
+              }`}>
+                <div className={`w-3 h-3 rounded-full ${
+                  client.ai_status === 'active' 
+                    ? 'bg-green-400 animate-pulse' 
+                    : client.ai_status === 'paused'
+                    ? 'bg-yellow-400'
+                    : 'bg-red-400'
+                }`}></div>
+                <span className={`text-sm font-light ${
+                  client.ai_status === 'active' 
+                    ? 'text-green-300' 
+                    : client.ai_status === 'paused'
+                    ? 'text-yellow-300'
+                    : 'text-red-300'
+                }`}>
+                  {client.ai_status === 'active' ? 'Подключен' : client.ai_status === 'paused' ? 'Приостановлен' : 'Отключен'}
+                </span>
               </div>
 
               {(() => {
@@ -255,18 +277,28 @@ export default function ClientDashboard() {
               <>
                 <LineChartCard
                   title="Конверсия в запись"
-                  data={metrics.map((m) => ({ 
-                    name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                    value: Number((m.conversion * 100).toFixed(1)) 
-                  }))}
+                  data={metrics.map((m) => {
+                    const [year, month] = (m.period_type || '').split('-');
+                    const date = new Date(parseInt(year), parseInt(month) - 1);
+                    const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                    return {
+                      name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                      value: Number((m.conversion * 100).toFixed(1))
+                    };
+                  })}
                   color="hsl(189 94% 43%)"
                 />
                 <LineChartCard
                   title="Автономность (без админа)"
-                  data={metrics.map((m) => ({ 
-                    name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                    value: Number((m.autonomy * 100).toFixed(1)) 
-                  }))}
+                  data={metrics.map((m) => {
+                    const [year, month] = (m.period_type || '').split('-');
+                    const date = new Date(parseInt(year), parseInt(month) - 1);
+                    const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                    return {
+                      name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                      value: Number((m.autonomy * 100).toFixed(1))
+                    };
+                  })}
                   color="hsl(280 70% 60%)"
                 />
                 <BarChartCard

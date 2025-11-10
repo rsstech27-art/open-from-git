@@ -10,6 +10,7 @@ export interface Client {
   manager_name: string | null;
   phone: string | null;
   status: string | null;
+  ai_status: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -71,11 +72,12 @@ export function useUpdateClient() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Client> }) => {
+    mutationFn: async ({ id, ...updates }: Partial<Client> & { id: string }) => {
+      const { id: clientId, ...updateData } = { id, ...updates };
       const { data, error } = await supabase
         .from("clients")
-        .update(updates)
-        .eq("id", id)
+        .update(updateData)
+        .eq("id", clientId)
         .select()
         .single();
 

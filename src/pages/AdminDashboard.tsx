@@ -161,9 +161,14 @@ export default function AdminDashboard() {
     };
   })();
 
-  // Set first client as selected when clients load
+  // Set first client as selected when clients load and update AI status
   if (clients.length > 0 && !selectedClientId) {
     setSelectedClientId(clients[0].id);
+  }
+  
+  // Update AI status when selected client changes
+  if (selectedClient && aiStatus !== selectedClient.ai_status) {
+    setAiStatus(selectedClient.ai_status || "active");
   }
 
 
@@ -249,12 +254,19 @@ export default function AdminDashboard() {
   };
 
   const handleStatusChange = async (newStatus: string) => {
+    if (!selectedClientId) return;
+    
     setAiStatus(newStatus);
-    if (selectedClientId) {
+    
+    try {
       await updateClient.mutateAsync({
         id: selectedClientId,
-        updates: { status: newStatus },
+        ai_status: newStatus,
       });
+      toast.success("Статус ИИ обновлен");
+    } catch (error) {
+      console.error("Error updating AI status:", error);
+      toast.error("Ошибка при обновлении статуса");
     }
   };
 
@@ -290,7 +302,7 @@ export default function AdminDashboard() {
     
     await updateClient.mutateAsync({
       id: selectedClientId,
-      updates: { manager_name: managerName === "unassigned" ? null : managerName },
+      manager_name: managerName === "unassigned" ? null : managerName,
     });
   };
 
@@ -663,22 +675,32 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {viewMode !== "month" && (
                 <>
-                  <LineChartCard
-                    title="Конверсия в запись"
-                    data={metrics.map((m) => ({ 
-                      name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                      value: Number((m.conversion * 100).toFixed(1)) 
-                    }))}
-                    color="hsl(189 94% 43%)"
-                  />
-                  <LineChartCard
-                    title="Автономность (без админа)"
-                    data={metrics.map((m) => ({ 
-                      name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                      value: Number((m.autonomy * 100).toFixed(1)) 
-                    }))}
-                    color="hsl(280 70% 60%)"
-                  />
+                <LineChartCard
+                  title="Конверсия в запись"
+                  data={metrics.map((m) => {
+                    const [year, month] = (m.period_type || '').split('-');
+                    const date = new Date(parseInt(year), parseInt(month) - 1);
+                    const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                    return {
+                      name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                      value: Number((m.conversion * 100).toFixed(1))
+                    };
+                  })}
+                  color="hsl(189 94% 43%)"
+                />
+                <LineChartCard
+                  title="Автономность (без админа)"
+                  data={metrics.map((m) => {
+                    const [year, month] = (m.period_type || '').split('-');
+                    const date = new Date(parseInt(year), parseInt(month) - 1);
+                    const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                    return {
+                      name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                      value: Number((m.autonomy * 100).toFixed(1))
+                    };
+                  })}
+                  color="hsl(280 70% 60%)"
+                />
                   <BarChartCard
                     title="Экономия времени (часы)"
                     data={metrics.map((m) => {
