@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, TrendingUp, Users, LogOut, Clock, CheckCircle2 } from "lucide-react";
+import { MessageSquare, TrendingUp, Users, LogOut, Clock, CheckCircle2, Smile } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
 import DoughnutChartCard from "@/components/dashboard/DoughnutChartCard";
+import GaugeChartCard from "@/components/dashboard/GaugeChartCard";
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientByUserId } from "@/hooks/useClients";
@@ -50,6 +51,12 @@ export default function ClientDashboard() {
         autonomy: 0,
         time_saved_hours: 0,
         confirmed_appointments: 0,
+        satisfaction: 0,
+        business_hours_appointments: 0,
+        non_business_hours_appointments: 0,
+        short_dialogs: 0,
+        medium_dialogs: 0,
+        long_dialogs: 0,
       };
     }
 
@@ -64,11 +71,23 @@ export default function ClientDashboard() {
       autonomy: acc.autonomy + m.autonomy,
       time_saved_hours: acc.time_saved_hours + (m.time_saved_hours || 0),
       confirmed_appointments: acc.confirmed_appointments + (m.confirmed_appointments || 0),
+      satisfaction: acc.satisfaction + m.satisfaction,
+      business_hours_appointments: acc.business_hours_appointments + (m.business_hours_appointments || 0),
+      non_business_hours_appointments: acc.non_business_hours_appointments + (m.non_business_hours_appointments || 0),
+      short_dialogs: acc.short_dialogs + (m.short_dialogs || 0),
+      medium_dialogs: acc.medium_dialogs + (m.medium_dialogs || 0),
+      long_dialogs: acc.long_dialogs + (m.long_dialogs || 0),
     }), {
       conversion: 0,
       autonomy: 0,
       time_saved_hours: 0,
       confirmed_appointments: 0,
+      satisfaction: 0,
+      business_hours_appointments: 0,
+      non_business_hours_appointments: 0,
+      short_dialogs: 0,
+      medium_dialogs: 0,
+      long_dialogs: 0,
     });
 
     // Calculate averages for percentage metrics, sum for count metrics
@@ -77,6 +96,12 @@ export default function ClientDashboard() {
       autonomy: sum.autonomy / metrics.length,
       time_saved_hours: sum.time_saved_hours,
       confirmed_appointments: sum.confirmed_appointments,
+      satisfaction: sum.satisfaction / metrics.length,
+      business_hours_appointments: sum.business_hours_appointments,
+      non_business_hours_appointments: sum.non_business_hours_appointments,
+      short_dialogs: sum.short_dialogs,
+      medium_dialogs: sum.medium_dialogs,
+      long_dialogs: sum.long_dialogs,
     };
   })();
 
@@ -226,41 +251,67 @@ export default function ClientDashboard() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <LineChartCard
-              title="Конверсия в запись"
-              data={metrics.map((m) => ({ 
-                name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                value: Number((m.conversion * 100).toFixed(1)) 
-              }))}
-              color="hsl(189 94% 43%)"
-            />
-            <LineChartCard
-              title="Автономность (без админа)"
-              data={metrics.map((m) => ({ 
-                name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                value: Number((m.autonomy * 100).toFixed(1)) 
-              }))}
-              color="hsl(280 70% 60%)"
-            />
-            <BarChartCard
-              title="Экономия времени (часы)"
-              data={metrics.map((m) => {
-                const date = new Date(m.date);
-                const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
-                return {
-                  name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
-                  value: m.time_saved_hours || 0
-                };
-              })}
-              color="hsl(189 94% 43%)"
+            {viewMode !== "month" && (
+              <>
+                <LineChartCard
+                  title="Конверсия в запись"
+                  data={metrics.map((m) => ({ 
+                    name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
+                    value: Number((m.conversion * 100).toFixed(1)) 
+                  }))}
+                  color="hsl(189 94% 43%)"
+                />
+                <LineChartCard
+                  title="Автономность (без админа)"
+                  data={metrics.map((m) => ({ 
+                    name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
+                    value: Number((m.autonomy * 100).toFixed(1)) 
+                  }))}
+                  color="hsl(280 70% 60%)"
+                />
+                <BarChartCard
+                  title="Экономия времени (часы)"
+                  data={metrics.map((m) => {
+                    const date = new Date(m.date);
+                    const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                    return {
+                      name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                      value: m.time_saved_hours || 0
+                    };
+                  })}
+                  color="hsl(189 94% 43%)"
+                />
+              </>
+            )}
+            <GaugeChartCard
+              title="Удовлетворенность клиента"
+              value={aggregatedMetric.satisfaction}
+              icon={<Smile className="h-4 w-4 text-muted-foreground" />}
             />
             <DoughnutChartCard
               title="Подтвержденные записи"
               data={[
                 { name: "Подтверждено", value: aggregatedMetric.confirmed_appointments || 0 },
-                { name: "Всего диалогов", value: Math.max(0, 100 - (aggregatedMetric.confirmed_appointments || 0)) },
+                { name: "Всего диалогов", value: (aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0) - (aggregatedMetric.confirmed_appointments || 0) },
               ]}
               colors={["hsl(160 65% 55%)", "hsl(280 70% 60%)"]}
+            />
+            <DoughnutChartCard
+              title="Записи по времени"
+              data={[
+                { name: "Рабочее время", value: aggregatedMetric.business_hours_appointments },
+                { name: "Нерабочее время", value: aggregatedMetric.non_business_hours_appointments },
+              ]}
+              colors={["hsl(189 94% 43%)", "hsl(330 85% 65%)"]}
+            />
+            <DoughnutChartCard
+              title="Длительность диалогов"
+              data={[
+                { name: "Короткие", value: aggregatedMetric.short_dialogs },
+                { name: "Средние", value: aggregatedMetric.medium_dialogs },
+                { name: "Длинные", value: aggregatedMetric.long_dialogs },
+              ]}
+              colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
             />
           </div>
         </div>
