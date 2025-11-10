@@ -13,7 +13,6 @@ import { dummyClientDetails, generateFakeMetrics } from "@/utils/mockData";
 import { toast } from "sonner";
 import { z } from "zod";
 import { parsePhoneNumber } from 'libphonenumber-js';
-import { useAuth } from "@/contexts/AuthContext";
 
 const clientDataSchema = z.object({
   data: z.string()
@@ -23,7 +22,6 @@ const clientDataSchema = z.object({
 });
 
 export default function AdminDashboard() {
-  const { signOut } = useAuth();
   const [selectedClient, setSelectedClient] = useState("client1");
   const [period, setPeriod] = useState("month");
   const [showClientCard, setShowClientCard] = useState(false);
@@ -141,9 +139,6 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-light">Панель администратора</h1>
-          <Button variant="outline" onClick={signOut}>
-            Выйти
-          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
