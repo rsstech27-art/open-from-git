@@ -14,7 +14,7 @@ import { useMetrics } from "@/hooks/useMetrics";
 
 export default function ClientDashboard() {
   const { user, signOut } = useAuth();
-  const [period, setPeriod] = useState("2025-01");
+  const [period, setPeriod] = useState("2025-10");
   
   const { data: client, isLoading: clientLoading } = useClientByUserId(user?.id);
   const { data: metrics = [], isLoading: metricsLoading } = useMetrics(client?.id, period);
@@ -104,6 +104,15 @@ export default function ClientDashboard() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="2025-10">Октябрь 2025</SelectItem>
+                <SelectItem value="2025-09">Сентябрь 2025</SelectItem>
+                <SelectItem value="2025-08">Август 2025</SelectItem>
+                <SelectItem value="2025-07">Июль 2025</SelectItem>
+                <SelectItem value="2025-06">Июнь 2025</SelectItem>
+                <SelectItem value="2025-05">Май 2025</SelectItem>
+                <SelectItem value="2025-04">Апрель 2025</SelectItem>
+                <SelectItem value="2025-03">Март 2025</SelectItem>
+                <SelectItem value="2025-02">Февраль 2025</SelectItem>
                 <SelectItem value="2025-01">Январь 2025</SelectItem>
                 <SelectItem value="2024-12">Декабрь 2024</SelectItem>
                 <SelectItem value="2024-11">Ноябрь 2024</SelectItem>
@@ -112,11 +121,6 @@ export default function ClientDashboard() {
                 <SelectItem value="2024-08">Август 2024</SelectItem>
                 <SelectItem value="2024-07">Июль 2024</SelectItem>
                 <SelectItem value="2024-06">Июнь 2024</SelectItem>
-                <SelectItem value="2024-05">Май 2024</SelectItem>
-                <SelectItem value="2024-04">Апрель 2024</SelectItem>
-                <SelectItem value="2024-03">Март 2024</SelectItem>
-                <SelectItem value="2024-02">Февраль 2024</SelectItem>
-                <SelectItem value="2024-01">Январь 2024</SelectItem>
               </SelectContent>
             </Select>
           </div>
