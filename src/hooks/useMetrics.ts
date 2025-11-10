@@ -20,30 +20,38 @@ export function useMetrics(clientId: string | undefined, period: string) {
     queryFn: async () => {
       if (!clientId) return [];
 
-      const now = new Date();
-      let startDate = new Date();
-
-      switch (period) {
-        case "week":
-          startDate.setDate(now.getDate() - 7);
-          break;
-        case "month":
-          startDate.setMonth(now.getMonth() - 1);
-          break;
-        case "half_year":
-          startDate.setMonth(now.getMonth() - 6);
-          break;
-        case "year":
-          startDate.setFullYear(now.getFullYear() - 1);
-          break;
-      }
-
-      const { data, error } = await supabase
+      let query = supabase
         .from("metrics")
         .select("*")
-        .eq("client_id", clientId)
-        .gte("date", startDate.toISOString().split("T")[0])
-        .order("date", { ascending: true });
+        .eq("client_id", clientId);
+
+      // If period is a specific month (YYYY-MM format), filter by period_type
+      if (period.match(/^\d{4}-\d{2}$/)) {
+        query = query.eq("period_type", period);
+      } else {
+        // Otherwise, use date range filtering (for week, month, etc.)
+        const now = new Date();
+        let startDate = new Date();
+
+        switch (period) {
+          case "week":
+            startDate.setDate(now.getDate() - 7);
+            break;
+          case "month":
+            startDate.setMonth(now.getMonth() - 1);
+            break;
+          case "half_year":
+            startDate.setMonth(now.getMonth() - 6);
+            break;
+          case "year":
+            startDate.setFullYear(now.getFullYear() - 1);
+            break;
+        }
+
+        query = query.gte("date", startDate.toISOString().split("T")[0]);
+      }
+
+      const { data, error } = await query.order("date", { ascending: true });
 
       if (error) throw error;
       return data as Metric[];

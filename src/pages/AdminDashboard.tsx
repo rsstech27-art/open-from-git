@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut, Plus } from "lucide-react";
@@ -10,6 +9,7 @@ import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
 import DoughnutChartCard from "@/components/dashboard/DoughnutChartCard";
+import MetricsForm from "@/components/dashboard/MetricsForm";
 import { toast } from "sonner";
 import { z } from "zod";
 import { parsePhoneNumber } from 'libphonenumber-js';
@@ -18,12 +18,6 @@ import { useClients, useClient, useUpdateClient, useCreateClient } from "@/hooks
 import { useManagers } from "@/hooks/useManagers";
 import { useMetrics } from "@/hooks/useMetrics";
 
-const clientDataSchema = z.object({
-  data: z.string()
-    .trim()
-    .min(1, "Данные не могут быть пустыми")
-    .max(5000, "Данные не должны превышать 5000 символов")
-});
 
 const newClientSchema = z.object({
   companyName: z.string()
@@ -43,10 +37,9 @@ const newClientSchema = z.object({
 export default function AdminDashboard() {
   const { signOut } = useAuth();
   const [selectedClientId, setSelectedClientId] = useState<string>("");
-  const [period, setPeriod] = useState("month");
+  const [period, setPeriod] = useState("2025-01");
   const [showClientCard, setShowClientCard] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [clientData, setClientData] = useState("");
   const [aiStatus, setAiStatus] = useState("active");
   const [newCompanyName, setNewCompanyName] = useState("");
   const [newClientName, setNewClientName] = useState("");
@@ -71,26 +64,6 @@ export default function AdminDashboard() {
     setSelectedClientId(clients[0].id);
   }
 
-  const handleSaveData = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const result = clientDataSchema.safeParse({ data: clientData });
-    
-    if (!result.success) {
-      toast.error(result.error.errors[0].message);
-      return;
-    }
-
-    if (!selectedClientId) {
-      toast.error("Выберите клиента");
-      return;
-    }
-    
-    // Here you would parse and save the metrics data to the database
-    // For now, just show success
-    toast.success("Данные сохранены");
-    setClientData("");
-  };
 
   const handleStatusChange = async (newStatus: string) => {
     setAiStatus(newStatus);
@@ -437,10 +410,19 @@ export default function AdminDashboard() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="week">За неделю</SelectItem>
-                  <SelectItem value="month">За месяц</SelectItem>
-                  <SelectItem value="half_year">За полгода</SelectItem>
-                  <SelectItem value="year">За год</SelectItem>
+                  <SelectItem value="2025-01">Январь 2025</SelectItem>
+                  <SelectItem value="2024-12">Декабрь 2024</SelectItem>
+                  <SelectItem value="2024-11">Ноябрь 2024</SelectItem>
+                  <SelectItem value="2024-10">Октябрь 2024</SelectItem>
+                  <SelectItem value="2024-09">Сентябрь 2024</SelectItem>
+                  <SelectItem value="2024-08">Август 2024</SelectItem>
+                  <SelectItem value="2024-07">Июль 2024</SelectItem>
+                  <SelectItem value="2024-06">Июнь 2024</SelectItem>
+                  <SelectItem value="2024-05">Май 2024</SelectItem>
+                  <SelectItem value="2024-04">Апрель 2024</SelectItem>
+                  <SelectItem value="2024-03">Март 2024</SelectItem>
+                  <SelectItem value="2024-02">Февраль 2024</SelectItem>
+                  <SelectItem value="2024-01">Январь 2024</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -511,24 +493,9 @@ export default function AdminDashboard() {
 
         <Card className="bg-card text-foreground p-6 rounded-2xl shadow-lg">
           <h3 className="text-xl font-light mb-4 pb-3 border-b border-border">
-            Внесение данных клиента за период
+            Внесение метрик клиента
           </h3>
-          <form onSubmit={handleSaveData}>
-            <Textarea
-              className="bg-muted border text-foreground mb-4 rounded-lg"
-              rows={8}
-              placeholder="Вставьте сюда данные клиента..."
-              value={clientData}
-              onChange={(e) => setClientData(e.target.value)}
-              maxLength={5000}
-            />
-            <p className="text-sm text-muted-foreground mb-4">
-              {clientData.length}/5000 символов
-            </p>
-            <Button type="submit" className="w-full rounded-lg" variant="secondary">
-              Сохранить изменения
-            </Button>
-          </form>
+          <MetricsForm clientId={selectedClientId} />
         </Card>
       </div>
     </div>

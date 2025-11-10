@@ -14,7 +14,7 @@ import { useMetrics } from "@/hooks/useMetrics";
 
 export default function ClientDashboard() {
   const { user, signOut } = useAuth();
-  const [period, setPeriod] = useState("month");
+  const [period, setPeriod] = useState("2025-01");
   
   const { data: client, isLoading: clientLoading } = useClientByUserId(user?.id);
   const { data: metrics = [], isLoading: metricsLoading } = useMetrics(client?.id, period);
@@ -104,10 +104,19 @@ export default function ClientDashboard() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="week">За неделю</SelectItem>
-                <SelectItem value="month">За месяц</SelectItem>
-                <SelectItem value="half_year">За полгода</SelectItem>
-                <SelectItem value="year">За год</SelectItem>
+                <SelectItem value="2025-01">Январь 2025</SelectItem>
+                <SelectItem value="2024-12">Декабрь 2024</SelectItem>
+                <SelectItem value="2024-11">Ноябрь 2024</SelectItem>
+                <SelectItem value="2024-10">Октябрь 2024</SelectItem>
+                <SelectItem value="2024-09">Сентябрь 2024</SelectItem>
+                <SelectItem value="2024-08">Август 2024</SelectItem>
+                <SelectItem value="2024-07">Июль 2024</SelectItem>
+                <SelectItem value="2024-06">Июнь 2024</SelectItem>
+                <SelectItem value="2024-05">Май 2024</SelectItem>
+                <SelectItem value="2024-04">Апрель 2024</SelectItem>
+                <SelectItem value="2024-03">Март 2024</SelectItem>
+                <SelectItem value="2024-02">Февраль 2024</SelectItem>
+                <SelectItem value="2024-01">Январь 2024</SelectItem>
               </SelectContent>
             </Select>
           </div>
