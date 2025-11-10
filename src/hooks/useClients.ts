@@ -96,25 +96,59 @@ export function useCreateClient() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newClient: { company_name: string; manager_name: string; phone: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) throw new Error("Не авторизован");
+    mutationFn: async (newClient: { company_name: string; manager_name: string; phone: string; email?: string }) => {
+      // Create a new user account for the client if email provided
+      if (newClient.email) {
+        const tempPassword = Math.random().toString(36).slice(-8);
+        
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: newClient.email,
+          password: tempPassword,
+          options: {
+            data: {
+              full_name: newClient.manager_name
+            }
+          }
+        });
 
-      const { data, error } = await supabase
-        .from("clients")
-        .insert({
-          company_name: newClient.company_name,
-          manager_name: newClient.manager_name,
-          phone: newClient.phone,
-          user_id: user.id,
-          status: "active"
-        })
-        .select()
-        .single();
+        if (authError) throw authError;
+        if (!authData.user) throw new Error("Не удалось создать пользователя");
 
-      if (error) throw error;
-      return data;
+        // Create client record linked to new user
+        const { data, error } = await supabase
+          .from("clients")
+          .insert({
+            company_name: newClient.company_name,
+            manager_name: newClient.manager_name,
+            phone: newClient.phone,
+            user_id: authData.user.id,
+            status: "active"
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      } else {
+        // For testing - create without auth
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Не авторизован");
+
+        const { data, error } = await supabase
+          .from("clients")
+          .insert({
+            company_name: newClient.company_name,
+            manager_name: newClient.manager_name,
+            phone: newClient.phone,
+            user_id: user.id,
+            status: "active"
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        return data;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
