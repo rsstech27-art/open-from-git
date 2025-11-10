@@ -266,26 +266,29 @@ export default function AdminDashboard() {
                 </div>
               </Card>
 
-              <Card className="bg-muted border p-4 flex items-center justify-between rounded-xl">
-                <div className="flex items-center space-x-4">
+              <Card className="bg-muted border p-4 rounded-xl">
+                <div className="flex items-start space-x-4 mb-4">
                   <MessageSquare className="w-8 h-8 text-green-500" />
-                  <div>
+                  <div className="flex-1">
                     <p className="text-sm text-foreground/70">Контактный телефон</p>
                     <p className="text-xl font-light text-foreground">{selectedClient?.phone || "Не указан"}</p>
                   </div>
                 </div>
+                
                 {selectedClient?.phone && (() => {
                   try {
                     const phoneNumber = parsePhoneNumber(selectedClient.phone, 'RU');
                     if (phoneNumber.isValid()) {
+                      const message = encodeURIComponent(`Здравствуйте! Это сообщение от ${selectedClient.company_name}.`);
                       return (
                         <a
-                          href={`https://wa.me/${phoneNumber.number}`}
+                          href={`https://wa.me/${phoneNumber.number}?text=${message}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-12 h-12 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-md transition transform hover:scale-105"
+                          className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white rounded-lg py-3 shadow-md transition transform hover:scale-105"
                         >
-                          <MessageSquare className="w-6 h-6" />
+                          <MessageSquare className="w-5 h-5" />
+                          <span className="font-medium">Написать в WhatsApp</span>
                         </a>
                       );
                     }
@@ -293,8 +296,9 @@ export default function AdminDashboard() {
                     console.error('Invalid phone number:', error);
                   }
                   return (
-                    <div className="w-12 h-12 flex items-center justify-center bg-muted border border-border text-muted-foreground rounded-xl">
-                      <MessageSquare className="w-6 h-6" />
+                    <div className="flex items-center justify-center gap-2 w-full bg-muted border border-border text-muted-foreground rounded-lg py-3">
+                      <MessageSquare className="w-5 h-5" />
+                      <span>Некорректный номер телефона</span>
                     </div>
                   );
                 })()}
