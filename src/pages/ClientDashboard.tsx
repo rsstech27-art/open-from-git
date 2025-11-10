@@ -1,44 +1,73 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { MessageSquare, TrendingUp, DollarSign, Users } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
 import DoughnutChartCard from "@/components/dashboard/DoughnutChartCard";
-import { dummyClientDetails, generateFakeMetrics } from "@/utils/mockData";
 import { parsePhoneNumber } from 'libphonenumber-js';
-
-const MOCK_CLIENT_ID = "client1";
+import { useAuth } from "@/contexts/AuthContext";
+import { useClientByUserId } from "@/hooks/useClients";
+import { useMetrics } from "@/hooks/useMetrics";
 
 export default function ClientDashboard() {
+  const { user, signOut } = useAuth();
   const [period, setPeriod] = useState("month");
+  
+  const { data: client, isLoading: clientLoading } = useClientByUserId(user?.id);
+  const { data: metrics = [], isLoading: metricsLoading } = useMetrics(client?.id, period);
+  
+  const latestMetric = metrics[metrics.length - 1] || {
+    conversion: 0,
+    autonomy: 0,
+    financial_equiv: 0,
+    retention_share: 0,
+  };
 
-  const client = dummyClientDetails[MOCK_CLIENT_ID];
-  const metrics = generateFakeMetrics(period);
-  const latestMetric = metrics[metrics.length - 1];
+  if (clientLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!client) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="p-8">
+          <p className="text-foreground">Клиент не найден. Обратитесь к администратору.</p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-light">Личный кабинет</h1>
+          <Button variant="outline" onClick={signOut}>
+            Выйти
+          </Button>
         </div>
 
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-border">
             <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 mb-4 md:mb-0">
               <h2 className="text-3xl font-light text-foreground mb-2 sm:mb-0">
-                {client.name}
+                {client.company_name}
               </h2>
               <div className="flex items-center space-x-2 px-3 py-1 bg-green-500/10 rounded-full border border-green-500/50 w-fit">
                 <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                 <span className="text-sm font-light text-green-300">Подключен</span>
               </div>
 
-              {(() => {
+              {client.phone && (() => {
                 try {
-                  const phoneNumber = parsePhoneNumber('+79990001122', 'RU');
+                  const phoneNumber = parsePhoneNumber(client.phone, 'RU');
                   if (phoneNumber.isValid()) {
                     return (
                       <a
@@ -102,17 +131,26 @@ export default function ClientDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <LineChartCard
               title="Конверсия в запись"
-              data={metrics.map((m) => ({ name: m.date, value: Number((m.conversion * 100).toFixed(1)) }))}
+              data={metrics.map((m) => ({ 
+                name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
+                value: Number((m.conversion * 100).toFixed(1)) 
+              }))}
               color="hsl(189 94% 43%)"
             />
             <LineChartCard
               title="Автономность (без админа)"
-              data={metrics.map((m) => ({ name: m.date, value: Number((m.autonomy * 100).toFixed(1)) }))}
+              data={metrics.map((m) => ({ 
+                name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
+                value: Number((m.autonomy * 100).toFixed(1)) 
+              }))}
               color="hsl(280 70% 60%)"
             />
             <BarChartCard
               title="Финансовый эквивалент экономии"
-              data={metrics.map((m) => ({ name: m.date, value: m.financial_equiv }))}
+              data={metrics.map((m) => ({ 
+                name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
+                value: m.financial_equiv 
+              }))}
               color="hsl(189 94% 43%)"
             />
             <DoughnutChartCard

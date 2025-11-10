@@ -9,10 +9,12 @@ import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
 import DoughnutChartCard from "@/components/dashboard/DoughnutChartCard";
-import { dummyClientDetails, generateFakeMetrics } from "@/utils/mockData";
 import { toast } from "sonner";
 import { z } from "zod";
 import { parsePhoneNumber } from 'libphonenumber-js';
+import { useAuth } from "@/contexts/AuthContext";
+import { useClients, useClient, useUpdateClient } from "@/hooks/useClients";
+import { useMetrics } from "@/hooks/useMetrics";
 
 const clientDataSchema = z.object({
   data: z.string()
@@ -22,16 +24,31 @@ const clientDataSchema = z.object({
 });
 
 export default function AdminDashboard() {
-  const [selectedClient, setSelectedClient] = useState("client1");
+  const { signOut } = useAuth();
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [period, setPeriod] = useState("month");
   const [showClientCard, setShowClientCard] = useState(false);
   const [clientData, setClientData] = useState("");
+  const [aiStatus, setAiStatus] = useState("active");
 
-  const client = dummyClientDetails[selectedClient];
-  const metrics = generateFakeMetrics(period);
-  const latestMetric = metrics[metrics.length - 1];
+  const { data: clients = [], isLoading: clientsLoading } = useClients();
+  const { data: selectedClient } = useClient(selectedClientId);
+  const { data: metrics = [] } = useMetrics(selectedClientId, period);
+  const updateClient = useUpdateClient();
+  
+  const latestMetric = metrics[metrics.length - 1] || {
+    conversion: 0,
+    autonomy: 0,
+    financial_equiv: 0,
+    retention_share: 0,
+  };
 
-  const handleSaveData = (e: React.FormEvent) => {
+  // Set first client as selected when clients load
+  if (clients.length > 0 && !selectedClientId) {
+    setSelectedClientId(clients[0].id);
+  }
+
+  const handleSaveData = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const result = clientDataSchema.safeParse({ data: clientData });
@@ -40,10 +57,45 @@ export default function AdminDashboard() {
       toast.error(result.error.errors[0].message);
       return;
     }
+
+    if (!selectedClientId) {
+      toast.error("Выберите клиента");
+      return;
+    }
     
+    // Here you would parse and save the metrics data to the database
+    // For now, just show success
     toast.success("Данные сохранены");
     setClientData("");
   };
+
+  const handleStatusChange = async (newStatus: string) => {
+    setAiStatus(newStatus);
+    if (selectedClientId) {
+      await updateClient.mutateAsync({
+        id: selectedClientId,
+        updates: { status: newStatus },
+      });
+    }
+  };
+
+  if (clientsLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (clients.length === 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="p-8">
+          <p className="text-foreground">Нет клиентов в системе. Добавьте клиентов для начала работы.</p>
+        </Card>
+      </div>
+    );
+  }
 
   if (showClientCard) {
     return (
@@ -68,7 +120,7 @@ export default function AdminDashboard() {
                 <Users className="w-8 h-8 text-primary" />
                 <div>
                   <p className="text-sm text-foreground/70">Закрепленный менеджер</p>
-                  <p className="text-xl font-light text-foreground">{client.manager}</p>
+                  <p className="text-xl font-light text-foreground">{selectedClient?.manager_name || "Не указан"}</p>
                 </div>
               </Card>
 
@@ -76,7 +128,7 @@ export default function AdminDashboard() {
                 <MessageSquare className="w-8 h-8 text-primary" />
                 <div>
                   <p className="text-sm text-foreground/70">Название компании</p>
-                  <p className="text-xl font-light text-foreground">{client.name}</p>
+                  <p className="text-xl font-light text-foreground">{selectedClient?.company_name}</p>
                 </div>
               </Card>
 
@@ -85,12 +137,12 @@ export default function AdminDashboard() {
                   <MessageSquare className="w-8 h-8 text-green-500" />
                   <div>
                     <p className="text-sm text-foreground/70">Контактный телефон</p>
-                    <p className="text-xl font-light text-foreground">{client.phone}</p>
+                    <p className="text-xl font-light text-foreground">{selectedClient?.phone || "Не указан"}</p>
                   </div>
                 </div>
-                {(() => {
+                {selectedClient?.phone && (() => {
                   try {
-                    const phoneNumber = parsePhoneNumber(client.phone, 'RU');
+                    const phoneNumber = parsePhoneNumber(selectedClient.phone, 'RU');
                     if (phoneNumber.isValid()) {
                       return (
                         <a
@@ -120,8 +172,8 @@ export default function AdminDashboard() {
 
               <Card className="bg-muted border p-6 space-y-4 rounded-xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                  <p className="text-sm text-foreground/70">Логин (Email):</p>
-                  <p className="text-lg font-mono text-foreground">{client.login}</p>
+                  <p className="text-sm text-foreground/70">Email клиента:</p>
+                  <p className="text-lg font-mono text-foreground">Связан с аккаунтом</p>
                 </div>
                 <div className="text-sm text-muted-foreground mt-4 p-3 bg-background rounded-lg border border-border">
                   <p>Для сброса пароля используйте функцию восстановления пароля в системе аутентификации.</p>
@@ -139,6 +191,9 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-light">Панель администратора</h1>
+          <Button variant="outline" onClick={signOut}>
+            Выйти
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
@@ -149,14 +204,14 @@ export default function AdminDashboard() {
             <div className="space-y-4">
               <div>
                 <Label className="text-muted-foreground mb-2 block">Компания</Label>
-                <Select value={selectedClient} onValueChange={setSelectedClient}>
+                <Select value={selectedClientId} onValueChange={setSelectedClientId}>
                   <SelectTrigger className="bg-muted border text-foreground rounded-lg">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.values(dummyClientDetails).map((client) => (
+                    {clients.map((client) => (
                       <SelectItem key={client.id} value={client.id}>
-                        {client.name}
+                        {client.company_name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -165,7 +220,7 @@ export default function AdminDashboard() {
 
               <div>
                 <Label className="text-muted-foreground mb-2 block">Статус ИИ</Label>
-                <Select defaultValue="active">
+                <Select value={aiStatus} onValueChange={handleStatusChange}>
                   <SelectTrigger className="bg-muted border text-foreground rounded-lg">
                     <SelectValue />
                   </SelectTrigger>
@@ -185,7 +240,7 @@ export default function AdminDashboard() {
                 className="text-3xl font-light text-foreground mb-4 md:mb-0 hover:text-primary transition cursor-pointer"
                 onClick={() => setShowClientCard(true)}
               >
-                {client.name}
+                {selectedClient?.company_name}
               </h2>
 
               <Select value={period} onValueChange={setPeriod}>
@@ -231,17 +286,26 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <LineChartCard
                 title="Конверсия в запись"
-                data={metrics.map((m) => ({ name: m.date, value: Number((m.conversion * 100).toFixed(1)) }))}
+                data={metrics.map((m) => ({ 
+                  name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
+                  value: Number((m.conversion * 100).toFixed(1)) 
+                }))}
                 color="hsl(189 94% 43%)"
               />
               <LineChartCard
                 title="Автономность (без админа)"
-                data={metrics.map((m) => ({ name: m.date, value: Number((m.autonomy * 100).toFixed(1)) }))}
+                data={metrics.map((m) => ({ 
+                  name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
+                  value: Number((m.autonomy * 100).toFixed(1)) 
+                }))}
                 color="hsl(280 70% 60%)"
               />
               <BarChartCard
                 title="Финансовый эквивалент экономии"
-                data={metrics.map((m) => ({ name: m.date, value: m.financial_equiv }))}
+                data={metrics.map((m) => ({ 
+                  name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
+                  value: m.financial_equiv 
+                }))}
                 color="hsl(189 94% 43%)"
               />
               <DoughnutChartCard
