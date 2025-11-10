@@ -731,155 +731,135 @@ export default function AdminDashboard() {
             </DialogHeader>
 
             {previewMetrics && (
-              <div className="space-y-4">
-                <Card className="p-4 bg-muted">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5 text-purple-500" />
-                      <span className="font-medium">Конверсия в запись</span>
-                    </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Card className="p-3 bg-muted">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MessageSquare className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm font-medium">Конверсия</span>
                     {previewMetrics.conversion > 0 ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                      <AlertCircle className="w-4 h-4 text-yellow-500 ml-auto" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{(previewMetrics.conversion * 100).toFixed(1)}%</p>
+                  <p className="text-xl font-light">{(previewMetrics.conversion * 100).toFixed(1)}%</p>
                 </Card>
 
-                <Card className="p-4 bg-muted">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-cyan-500" />
-                      <span className="font-medium">Автономность</span>
-                    </div>
+                <Card className="p-3 bg-muted">
+                  <div className="flex items-center gap-2 mb-1">
+                    <TrendingUp className="w-4 h-4 text-cyan-500" />
+                    <span className="text-sm font-medium">Автономность</span>
                     {previewMetrics.autonomy > 0 ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                      <AlertCircle className="w-4 h-4 text-yellow-500 ml-auto" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{(previewMetrics.autonomy * 100).toFixed(1)}%</p>
+                  <p className="text-xl font-light">{(previewMetrics.autonomy * 100).toFixed(1)}%</p>
                 </Card>
 
-                <Card className="p-4 bg-muted">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-red-500" />
-                      <span className="font-medium">Экономия времени</span>
-                    </div>
+                <Card className="p-3 bg-muted">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="w-4 h-4 text-red-500" />
+                    <span className="text-sm font-medium">Экономия</span>
                     {(previewMetrics.time_saved_hours || 0) > 0 ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                      <AlertCircle className="w-4 h-4 text-yellow-500 ml-auto" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{previewMetrics.time_saved_hours || 0} ч</p>
+                  <p className="text-xl font-light">{previewMetrics.time_saved_hours || 0} ч</p>
                 </Card>
 
-                <Card className="p-4 bg-muted">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
-                      <span className="font-medium">Подтвержденные записи</span>
-                    </div>
+                <Card className="p-3 bg-muted">
+                  <div className="flex items-center gap-2 mb-1">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <span className="text-sm font-medium">Записи</span>
                     {(previewMetrics.confirmed_appointments || 0) > 0 ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                      <AlertCircle className="w-4 h-4 text-yellow-500 ml-auto" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{previewMetrics.confirmed_appointments || 0}</p>
+                  <p className="text-xl font-light">{previewMetrics.confirmed_appointments || 0}</p>
                 </Card>
 
-                <Card className="p-4 bg-muted">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <Smile className="w-5 h-5 text-blue-500" />
-                      <span className="font-medium">Удовлетворенность клиента</span>
-                    </div>
+                <Card className="p-3 bg-muted">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Smile className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm font-medium">Удовлетвор.</span>
                     {previewMetrics.satisfaction > 0 ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                      <AlertCircle className="w-4 h-4 text-yellow-500 ml-auto" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{(previewMetrics.satisfaction * 100).toFixed(1)}%</p>
+                  <p className="text-xl font-light">{(previewMetrics.satisfaction * 100).toFixed(1)}%</p>
                 </Card>
 
-                <Card className="p-4 bg-muted">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5 text-cyan-500" />
-                      <span className="font-medium">Записи в рабочее время</span>
-                    </div>
+                <Card className="p-3 bg-muted">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MessageSquare className="w-4 h-4 text-cyan-500" />
+                    <span className="text-sm font-medium">Рабочее</span>
                     {previewMetrics.business_hours_appointments > 0 ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                      <AlertCircle className="w-4 h-4 text-yellow-500 ml-auto" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{previewMetrics.business_hours_appointments}</p>
+                  <p className="text-xl font-light">{previewMetrics.business_hours_appointments}</p>
                 </Card>
 
-                <Card className="p-4 bg-muted">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5 text-purple-500" />
-                      <span className="font-medium">Записи в нерабочее время</span>
-                    </div>
+                <Card className="p-3 bg-muted">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MessageSquare className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm font-medium">Нерабочее</span>
                     {previewMetrics.non_business_hours_appointments > 0 ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                      <AlertCircle className="w-4 h-4 text-yellow-500 ml-auto" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{previewMetrics.non_business_hours_appointments}</p>
+                  <p className="text-xl font-light">{previewMetrics.non_business_hours_appointments}</p>
                 </Card>
 
-                <Card className="p-4 bg-muted">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5 text-cyan-500" />
-                      <span className="font-medium">Короткие диалоги</span>
-                    </div>
+                <Card className="p-3 bg-muted">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MessageSquare className="w-4 h-4 text-cyan-500" />
+                    <span className="text-sm font-medium">Короткие</span>
                     {previewMetrics.short_dialogs > 0 ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                      <AlertCircle className="w-4 h-4 text-yellow-500 ml-auto" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{previewMetrics.short_dialogs}</p>
+                  <p className="text-xl font-light">{previewMetrics.short_dialogs}</p>
                 </Card>
 
-                <Card className="p-4 bg-muted">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5 text-purple-500" />
-                      <span className="font-medium">Средние диалоги</span>
-                    </div>
+                <Card className="p-3 bg-muted">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MessageSquare className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm font-medium">Средние</span>
                     {previewMetrics.medium_dialogs > 0 ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                      <AlertCircle className="w-4 h-4 text-yellow-500 ml-auto" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{previewMetrics.medium_dialogs}</p>
+                  <p className="text-xl font-light">{previewMetrics.medium_dialogs}</p>
                 </Card>
 
-                <Card className="p-4 bg-muted">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5 text-red-500" />
-                      <span className="font-medium">Длинные диалоги</span>
-                    </div>
+                <Card className="p-3 bg-muted">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MessageSquare className="w-4 h-4 text-red-500" />
+                    <span className="text-sm font-medium">Длинные</span>
                     {previewMetrics.long_dialogs > 0 ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500 ml-auto" />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                      <AlertCircle className="w-4 h-4 text-yellow-500 ml-auto" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{previewMetrics.long_dialogs}</p>
+                  <p className="text-xl font-light">{previewMetrics.long_dialogs}</p>
                 </Card>
 
                 {(previewMetrics.conversion === 0 || previewMetrics.autonomy === 0 || 
@@ -887,12 +867,12 @@ export default function AdminDashboard() {
                   previewMetrics.satisfaction === 0 || previewMetrics.business_hours_appointments === 0 ||
                   previewMetrics.non_business_hours_appointments === 0 || previewMetrics.short_dialogs === 0 ||
                   previewMetrics.medium_dialogs === 0 || previewMetrics.long_dialogs === 0) && (
-                  <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                    <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
-                    <div className="text-sm">
+                  <div className="col-span-2 flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                    <AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
+                    <div className="text-xs">
                       <p className="font-medium text-yellow-700 dark:text-yellow-400">Некоторые метрики не распознаны</p>
                       <p className="text-muted-foreground mt-1">
-                        Убедитесь, что данные содержат ключевые слова: конверсия, автономность, экономия, повторные, удовлетворенность, рабочее время, нерабочее время, короткие диалоги, средние диалоги, длинные диалоги
+                        Убедитесь, что данные содержат ключевые слова
                       </p>
                     </div>
                   </div>
