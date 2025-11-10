@@ -46,23 +46,13 @@ export default function ClientDashboard() {
   // Aggregate metrics based on view mode
   const aggregatedMetric = (() => {
     if (metrics.length === 0) {
-      return {
-        conversion: 0,
-        autonomy: 0,
-        time_saved_hours: 0,
-        confirmed_appointments: 0,
-        satisfaction: 0,
-        business_hours_appointments: 0,
-        non_business_hours_appointments: 0,
-        short_dialogs: 0,
-        medium_dialogs: 0,
-        long_dialogs: 0,
-      };
+      return null; // Return null instead of zeros when no data
     }
 
     if (viewMode === "month") {
-      // For month view, use the latest metric
-      return metrics[metrics.length - 1];
+      // For month view, find the metric for the selected period
+      const monthMetric = metrics.find(m => m.period_type === period);
+      return monthMetric || null;
     }
 
     // For half_year and year views, aggregate the data
@@ -245,108 +235,120 @@ export default function ClientDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <KpiCard
-              title="Конверсия в запись"
-              value={`${(aggregatedMetric.conversion * 100).toFixed(1)}%`}
-              icon={MessageSquare}
-              gradient="purple"
-            />
-            <KpiCard
-              title="Автономность"
-              value={`${(aggregatedMetric.autonomy * 100).toFixed(1)}%`}
-              icon={TrendingUp}
-              gradient="cyan"
-            />
-            <KpiCard
-              title="Экономия времени"
-              value={`${aggregatedMetric.time_saved_hours || 0} ч`}
-              icon={Clock}
-              gradient="salmon"
-            />
-            <KpiCard
-              title="Подтвержденные записи"
-              value={aggregatedMetric.confirmed_appointments || 0}
-              icon={CheckCircle2}
-              gradient="green"
-            />
-          </div>
+          {aggregatedMetric ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <KpiCard
+                title="Конверсия в запись"
+                value={`${(aggregatedMetric.conversion * 100).toFixed(1)}%`}
+                icon={MessageSquare}
+                gradient="purple"
+              />
+              <KpiCard
+                title="Автономность"
+                value={`${(aggregatedMetric.autonomy * 100).toFixed(1)}%`}
+                icon={TrendingUp}
+                gradient="cyan"
+              />
+              <KpiCard
+                title="Экономия времени"
+                value={`${aggregatedMetric.time_saved_hours || 0} ч`}
+                icon={Clock}
+                gradient="salmon"
+              />
+              <KpiCard
+                title="Подтвержденные записи"
+                value={aggregatedMetric.confirmed_appointments || 0}
+                icon={CheckCircle2}
+                gradient="green"
+              />
+            </div>
+          ) : (
+            <Card className="bg-card text-foreground p-8 rounded-2xl shadow-lg text-center">
+              <p className="text-muted-foreground">
+                {viewMode === "month" 
+                  ? "Данные за выбранный месяц еще не заполнены" 
+                  : "Данные за выбранный период еще не заполнены"}
+              </p>
+            </Card>
+          )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {viewMode !== "month" && (
-              <>
-                <LineChartCard
-                  title="Конверсия в запись"
-                  data={metrics.map((m) => {
-                    const [year, month] = (m.period_type || '').split('-');
-                    const date = new Date(parseInt(year), parseInt(month) - 1);
-                    const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
-                    return {
-                      name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
-                      value: Number((m.conversion * 100).toFixed(1))
-                    };
-                  })}
-                  color="hsl(189 94% 43%)"
-                />
-                <LineChartCard
-                  title="Автономность (без админа)"
-                  data={metrics.map((m) => {
-                    const [year, month] = (m.period_type || '').split('-');
-                    const date = new Date(parseInt(year), parseInt(month) - 1);
-                    const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
-                    return {
-                      name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
-                      value: Number((m.autonomy * 100).toFixed(1))
-                    };
-                  })}
-                  color="hsl(280 70% 60%)"
-                />
-                <BarChartCard
-                  title="Экономия времени (часы)"
-                  data={metrics.map((m) => {
-                    const [year, month] = (m.period_type || '').split('-');
-                    const date = new Date(parseInt(year), parseInt(month) - 1);
-                    const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
-                    return {
-                      name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
-                      value: m.time_saved_hours || 0
-                    };
-                  })}
-                  color="hsl(189 94% 43%)"
-                />
-              </>
-            )}
-            <GaugeChartCard
-              title="Удовлетворенность клиента"
-              value={aggregatedMetric.satisfaction}
-              icon={<Smile className="h-4 w-4 text-muted-foreground" />}
-            />
-            <DoughnutChartCard
-              title="Подтвержденные записи"
-              data={[
-                { name: "Подтверждено", value: aggregatedMetric.confirmed_appointments || 0 },
-                { name: "Всего диалогов", value: (aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0) - (aggregatedMetric.confirmed_appointments || 0) },
-              ]}
-              colors={["hsl(160 65% 55%)", "hsl(280 70% 60%)"]}
-            />
-            <DoughnutChartCard
-              title="Записи по времени"
-              data={[
-                { name: "Рабочее время", value: aggregatedMetric.business_hours_appointments },
-                { name: "Нерабочее время", value: aggregatedMetric.non_business_hours_appointments },
-              ]}
-              colors={["hsl(189 94% 43%)", "hsl(330 85% 65%)"]}
-            />
-            <DoughnutChartCard
-              title="Длительность диалогов"
-              data={[
-                { name: "Короткие", value: aggregatedMetric.short_dialogs },
-                { name: "Средние", value: aggregatedMetric.medium_dialogs },
-                { name: "Длинные", value: aggregatedMetric.long_dialogs },
-              ]}
-              colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
-            />
-          </div>
+          {aggregatedMetric && metrics.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {viewMode !== "month" && (
+                <>
+                  <LineChartCard
+                    title="Конверсия в запись"
+                    data={metrics.map((m) => {
+                      const [year, month] = (m.period_type || '').split('-');
+                      const date = new Date(parseInt(year), parseInt(month) - 1);
+                      const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                      return {
+                        name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                        value: Number((m.conversion * 100).toFixed(1))
+                      };
+                    })}
+                    color="hsl(189 94% 43%)"
+                  />
+                  <LineChartCard
+                    title="Автономность (без админа)"
+                    data={metrics.map((m) => {
+                      const [year, month] = (m.period_type || '').split('-');
+                      const date = new Date(parseInt(year), parseInt(month) - 1);
+                      const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                      return {
+                        name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                        value: Number((m.autonomy * 100).toFixed(1))
+                      };
+                    })}
+                    color="hsl(280 70% 60%)"
+                  />
+                  <BarChartCard
+                    title="Экономия времени (часы)"
+                    data={metrics.map((m) => {
+                      const [year, month] = (m.period_type || '').split('-');
+                      const date = new Date(parseInt(year), parseInt(month) - 1);
+                      const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                      return {
+                        name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                        value: m.time_saved_hours || 0
+                      };
+                    })}
+                    color="hsl(189 94% 43%)"
+                  />
+                </>
+              )}
+              <GaugeChartCard
+                title="Удовлетворенность клиента"
+                value={aggregatedMetric.satisfaction}
+                icon={<Smile className="h-4 w-4 text-muted-foreground" />}
+              />
+              <DoughnutChartCard
+                title="Подтвержденные записи"
+                data={[
+                  { name: "Подтверждено", value: aggregatedMetric.confirmed_appointments || 0 },
+                  { name: "Всего диалогов", value: (aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0) - (aggregatedMetric.confirmed_appointments || 0) },
+                ]}
+                colors={["hsl(160 65% 55%)", "hsl(280 70% 60%)"]}
+              />
+              <DoughnutChartCard
+                title="Записи по времени"
+                data={[
+                  { name: "Рабочее время", value: aggregatedMetric.business_hours_appointments },
+                  { name: "Нерабочее время", value: aggregatedMetric.non_business_hours_appointments },
+                ]}
+                colors={["hsl(189 94% 43%)", "hsl(330 85% 65%)"]}
+              />
+              <DoughnutChartCard
+                title="Длительность диалогов"
+                data={[
+                  { name: "Короткие", value: aggregatedMetric.short_dialogs },
+                  { name: "Средние", value: aggregatedMetric.medium_dialogs },
+                  { name: "Длинные", value: aggregatedMetric.long_dialogs },
+                ]}
+                colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     </div>
