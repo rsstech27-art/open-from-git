@@ -28,6 +28,18 @@ export function useMetrics(clientId: string | undefined, period: string) {
       // If period is a specific month (YYYY-MM format), filter by period_type
       if (period.match(/^\d{4}-\d{2}$/)) {
         query = query.eq("period_type", period);
+      } else if (period === "half_year") {
+        // Get last 6 months of data
+        const now = new Date();
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(now.getMonth() - 6);
+        query = query.gte("date", sixMonthsAgo.toISOString().split("T")[0]);
+      } else if (period === "year") {
+        // Get last 12 months of data
+        const now = new Date();
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(now.getFullYear() - 1);
+        query = query.gte("date", oneYearAgo.toISOString().split("T")[0]);
       } else {
         // Otherwise, use date range filtering (for week, month, etc.)
         const now = new Date();
@@ -39,12 +51,6 @@ export function useMetrics(clientId: string | undefined, period: string) {
             break;
           case "month":
             startDate.setMonth(now.getMonth() - 1);
-            break;
-          case "half_year":
-            startDate.setMonth(now.getMonth() - 6);
-            break;
-          case "year":
-            startDate.setFullYear(now.getFullYear() - 1);
             break;
         }
 

@@ -44,6 +44,7 @@ export default function AdminDashboard() {
   const { signOut } = useAuth();
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [period, setPeriod] = useState("2025-10");
+  const [viewMode, setViewMode] = useState<"month" | "half_year" | "year">("month");
   const [showClientCard, setShowClientCard] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [clientData, setClientData] = useState("");
@@ -56,10 +57,32 @@ export default function AdminDashboard() {
   const { data: clients = [], isLoading: clientsLoading } = useClients();
   const { data: selectedClient } = useClient(selectedClientId);
   const { data: managers = [] } = useManagers();
-  const { data: metrics = [] } = useMetrics(selectedClientId, period);
+  const { data: metrics = [] } = useMetrics(selectedClientId, viewMode === "month" ? period : viewMode);
   const updateClient = useUpdateClient();
   const createClient = useCreateClient();
   const createMetric = useCreateMetric();
+
+  // Generate periods starting from October 2025
+  const generatePeriods = () => {
+    const periods = [];
+    const startDate = new Date(2025, 9, 1); // October 2025
+    const monthsToGenerate = 12; // Generate next 12 months
+
+    for (let i = 0; i < monthsToGenerate; i++) {
+      const date = new Date(startDate);
+      date.setMonth(startDate.getMonth() + i);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const monthName = date.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+      periods.push({
+        value: `${year}-${month}`,
+        label: monthName.charAt(0).toUpperCase() + monthName.slice(1)
+      });
+    }
+    return periods;
+  };
+
+  const periods = generatePeriods();
   
   const latestMetric = metrics[metrics.length - 1] || {
     conversion: 0,
@@ -454,40 +477,59 @@ export default function AdminDashboard() {
           </Card>
 
           <div className="lg:col-span-3 space-y-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-border">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-border gap-4">
               <Button
                 variant="outline"
                 size="lg"
-                className="text-2xl font-light mb-4 md:mb-0 h-auto py-3 px-6"
+                className="text-2xl font-light h-auto py-3 px-6"
                 onClick={() => setShowClientCard(true)}
               >
                 {selectedClient?.company_name}
               </Button>
 
-              <Select value={period} onValueChange={setPeriod}>
-                <SelectTrigger className="w-48 bg-muted border text-foreground rounded-lg">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2025-10">Октябрь 2025</SelectItem>
-                  <SelectItem value="2025-09">Сентябрь 2025</SelectItem>
-                  <SelectItem value="2025-08">Август 2025</SelectItem>
-                  <SelectItem value="2025-07">Июль 2025</SelectItem>
-                  <SelectItem value="2025-06">Июнь 2025</SelectItem>
-                  <SelectItem value="2025-05">Май 2025</SelectItem>
-                  <SelectItem value="2025-04">Апрель 2025</SelectItem>
-                  <SelectItem value="2025-03">Март 2025</SelectItem>
-                  <SelectItem value="2025-02">Февраль 2025</SelectItem>
-                  <SelectItem value="2025-01">Январь 2025</SelectItem>
-                  <SelectItem value="2024-12">Декабрь 2024</SelectItem>
-                  <SelectItem value="2024-11">Ноябрь 2024</SelectItem>
-                  <SelectItem value="2024-10">Октябрь 2024</SelectItem>
-                  <SelectItem value="2024-09">Сентябрь 2024</SelectItem>
-                  <SelectItem value="2024-08">Август 2024</SelectItem>
-                  <SelectItem value="2024-07">Июль 2024</SelectItem>
-                  <SelectItem value="2024-06">Июнь 2024</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <div className="flex border border-border rounded-lg overflow-hidden">
+                  <Button
+                    variant={viewMode === "month" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("month")}
+                    className="rounded-none"
+                  >
+                    Месяц
+                  </Button>
+                  <Button
+                    variant={viewMode === "half_year" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("half_year")}
+                    className="rounded-none border-l border-r border-border"
+                  >
+                    Полгода
+                  </Button>
+                  <Button
+                    variant={viewMode === "year" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setViewMode("year")}
+                    className="rounded-none"
+                  >
+                    Год
+                  </Button>
+                </div>
+
+                {viewMode === "month" && (
+                  <Select value={period} onValueChange={setPeriod}>
+                    <SelectTrigger className="w-48 bg-muted border text-foreground rounded-lg">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {periods.map(p => (
+                        <SelectItem key={p.value} value={p.value}>
+                          {p.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -566,23 +608,11 @@ export default function AdminDashboard() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2025-10">Октябрь 2025</SelectItem>
-                  <SelectItem value="2025-09">Сентябрь 2025</SelectItem>
-                  <SelectItem value="2025-08">Август 2025</SelectItem>
-                  <SelectItem value="2025-07">Июль 2025</SelectItem>
-                  <SelectItem value="2025-06">Июнь 2025</SelectItem>
-                  <SelectItem value="2025-05">Май 2025</SelectItem>
-                  <SelectItem value="2025-04">Апрель 2025</SelectItem>
-                  <SelectItem value="2025-03">Март 2025</SelectItem>
-                  <SelectItem value="2025-02">Февраль 2025</SelectItem>
-                  <SelectItem value="2025-01">Январь 2025</SelectItem>
-                  <SelectItem value="2024-12">Декабрь 2024</SelectItem>
-                  <SelectItem value="2024-11">Ноябрь 2024</SelectItem>
-                  <SelectItem value="2024-10">Октябрь 2024</SelectItem>
-                  <SelectItem value="2024-09">Сентябрь 2024</SelectItem>
-                  <SelectItem value="2024-08">Август 2024</SelectItem>
-                  <SelectItem value="2024-07">Июль 2024</SelectItem>
-                  <SelectItem value="2024-06">Июнь 2024</SelectItem>
+                  {periods.map(p => (
+                    <SelectItem key={p.value} value={p.value}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
