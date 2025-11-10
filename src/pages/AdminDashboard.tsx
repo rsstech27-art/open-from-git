@@ -147,20 +147,25 @@ export default function AdminDashboard() {
   const handleConfirmSave = async () => {
     if (!previewMetrics) return;
 
-    await createMetric.mutateAsync({
-      client_id: selectedClientId,
-      date: new Date().toISOString().split('T')[0],
-      period_type: reportPeriod,
-      conversion: previewMetrics.conversion,
-      autonomy: previewMetrics.autonomy,
-      financial_equiv: previewMetrics.financial_equiv,
-      retention_share: previewMetrics.retention_share,
-    });
+    try {
+      await createMetric.mutateAsync({
+        client_id: selectedClientId,
+        date: new Date().toISOString().split('T')[0],
+        period_type: reportPeriod,
+        conversion: previewMetrics.conversion,
+        autonomy: previewMetrics.autonomy,
+        financial_equiv: previewMetrics.financial_equiv,
+        retention_share: previewMetrics.retention_share,
+      });
 
-    setClientData("");
-    setReportPeriod("2025-10");
-    setShowPreview(false);
-    setPreviewMetrics(null);
+      setClientData("");
+      setReportPeriod("2025-10");
+      setShowPreview(false);
+      setPreviewMetrics(null);
+    } catch (error) {
+      console.error("Error saving metrics:", error);
+      toast.error("Ошибка при сохранении метрики");
+    }
   };
 
   const handleStatusChange = async (newStatus: string) => {
