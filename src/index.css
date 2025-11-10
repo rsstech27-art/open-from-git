@@ -110,6 +110,21 @@ All colors MUST be HSL.
     }
   }
 
+  @keyframes neon-glow {
+    0%, 100% {
+      box-shadow: 
+        0 0 20px hsl(var(--gradient-cyan-start) / 0.3),
+        0 0 40px hsl(var(--gradient-purple-start) / 0.2),
+        0 0 60px hsl(var(--gradient-salmon-start) / 0.1);
+    }
+    50% {
+      box-shadow: 
+        0 0 30px hsl(var(--gradient-cyan-start) / 0.5),
+        0 0 60px hsl(var(--gradient-purple-start) / 0.3),
+        0 0 90px hsl(var(--gradient-salmon-start) / 0.2);
+    }
+  }
+
   .animated-gradient-bg {
     background: linear-gradient(
       -45deg,
@@ -120,5 +135,9 @@ All colors MUST be HSL.
     );
     background-size: 400% 400%;
     animation: gradient-animation 15s ease infinite;
+  }
+
+  .neon-card {
+    animation: neon-glow 3s ease-in-out infinite;
   }
 }

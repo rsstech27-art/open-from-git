@@ -120,7 +120,7 @@ export default function Login() {
           </Button>
         </div>
       )}
-      <Card className="w-full max-w-md p-8 space-y-6">
+      <Card className="w-full max-w-md p-8 space-y-6 neon-card backdrop-blur-sm bg-card/95">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-light text-primary">
             {isRegister ? "Регистрация" : "Вход"}
