@@ -236,12 +236,14 @@ export default function AdminDashboard() {
 
           <div className="lg:col-span-3 space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-4 border-b border-border">
-              <h2
-                className="text-3xl font-light text-foreground mb-4 md:mb-0 hover:text-primary transition cursor-pointer"
+              <Button
+                variant="outline"
+                size="lg"
+                className="text-2xl font-light mb-4 md:mb-0 h-auto py-3 px-6"
                 onClick={() => setShowClientCard(true)}
               >
                 {selectedClient?.company_name}
-              </h2>
+              </Button>
 
               <Select value={period} onValueChange={setPeriod}>
                 <SelectTrigger className="w-48 bg-muted border text-foreground rounded-lg">
