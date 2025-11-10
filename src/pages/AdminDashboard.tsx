@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, MessageSquare, TrendingUp, DollarSign, Users } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
@@ -14,6 +13,7 @@ import { dummyClientDetails, generateFakeMetrics } from "@/utils/mockData";
 import { toast } from "sonner";
 import { z } from "zod";
 import { parsePhoneNumber } from 'libphonenumber-js';
+import { useAuth } from "@/contexts/AuthContext";
 
 const clientDataSchema = z.object({
   data: z.string()
@@ -23,7 +23,7 @@ const clientDataSchema = z.object({
 });
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [selectedClient, setSelectedClient] = useState("client1");
   const [period, setPeriod] = useState("month");
   const [showClientCard, setShowClientCard] = useState(false);
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-light">Панель администратора</h1>
-          <Button variant="outline" onClick={() => navigate("/")}>
+          <Button variant="outline" onClick={signOut}>
             Выйти
           </Button>
         </div>

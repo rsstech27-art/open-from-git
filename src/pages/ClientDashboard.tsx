@@ -3,18 +3,18 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, TrendingUp, DollarSign, Users } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
 import DoughnutChartCard from "@/components/dashboard/DoughnutChartCard";
 import { dummyClientDetails, generateFakeMetrics } from "@/utils/mockData";
 import { parsePhoneNumber } from 'libphonenumber-js';
+import { useAuth } from "@/contexts/AuthContext";
 
 const MOCK_CLIENT_ID = "client1";
 
 export default function ClientDashboard() {
-  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [period, setPeriod] = useState("month");
 
   const client = dummyClientDetails[MOCK_CLIENT_ID];
@@ -26,7 +26,7 @@ export default function ClientDashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-light">Личный кабинет</h1>
-          <Button variant="outline" onClick={() => navigate("/")}>
+          <Button variant="outline" onClick={signOut}>
             Выйти
           </Button>
         </div>

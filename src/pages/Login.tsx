@@ -13,8 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Login() {
@@ -26,17 +25,35 @@ export default function Login() {
   const [resetEmail, setResetEmail] = useState("");
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
-  const { user, signIn, signUp } = useAuth();
-  const { role, loading: roleLoading } = useUserRole();
+  const { user, role, loading: authLoading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
   // Redirect authenticated users to their dashboard
   useEffect(() => {
-    if (user && role && !roleLoading) {
+    // Only redirect if auth is fully loaded and we have both user and role
+    if (!authLoading && user && role) {
       const path = role === "admin" ? "/admin" : "/client";
       navigate(path, { replace: true });
     }
-  }, [user, role, roleLoading, navigate]);
+  }, [authLoading, user, role, navigate]);
+
+  // Show loading screen while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Загрузка...</div>
+      </div>
+    );
+  }
+
+  // Don't render login form if already authenticated
+  if (user && role) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Перенаправление...</div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +90,6 @@ export default function Login() {
           }
         } else {
           toast.success("Вход выполнен успешно!");
-          // Navigation will happen automatically via useEffect
         }
       }
     } catch (error) {
