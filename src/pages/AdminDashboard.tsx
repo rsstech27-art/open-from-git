@@ -307,17 +307,22 @@ export default function AdminDashboard() {
                   try {
                     const phoneNumber = parsePhoneNumber(selectedClient.phone, 'RU');
                     if (phoneNumber.isValid()) {
+                      const cleanNumber = phoneNumber.number.replace(/\+/g, '');
                       const message = encodeURIComponent(`Здравствуйте! Это сообщение от ${selectedClient.company_name}.`);
+                      
+                      const handleWhatsAppClick = () => {
+                        // Try web.whatsapp.com instead of wa.me if blocked
+                        window.open(`https://web.whatsapp.com/send?phone=${cleanNumber}&text=${message}`, '_blank');
+                      };
+                      
                       return (
-                        <a
-                          href={`https://wa.me/${phoneNumber.number}?text=${message}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={handleWhatsAppClick}
                           className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white rounded-lg py-3 shadow-md transition transform hover:scale-105"
                         >
                           <MessageSquare className="w-5 h-5" />
                           <span className="font-medium">Написать в WhatsApp</span>
-                        </a>
+                        </button>
                       );
                     }
                   } catch (error) {
