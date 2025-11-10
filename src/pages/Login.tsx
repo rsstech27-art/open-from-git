@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { LogOut } from "lucide-react";
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -25,7 +26,7 @@ export default function Login() {
   const [resetEmail, setResetEmail] = useState("");
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
-  const { user, role, loading: authLoading, signIn, signUp } = useAuth();
+  const { user, role, loading: authLoading, signIn, signUp, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -111,6 +112,14 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      {user && (
+        <div className="absolute top-4 right-4">
+          <Button variant="outline" size="sm" onClick={signOut}>
+            <LogOut className="w-4 h-4 mr-2" />
+            Выйти
+          </Button>
+        </div>
+      )}
       <Card className="w-full max-w-md p-8 space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-light text-primary">
