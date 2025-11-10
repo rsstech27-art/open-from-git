@@ -270,13 +270,13 @@ export default function AdminDashboard() {
                       value={selectedClient?.manager_name || ""} 
                       onValueChange={handleManagerChange}
                     >
-                      <SelectTrigger className="bg-background border text-foreground rounded-lg">
+                      <SelectTrigger className="bg-background border text-foreground rounded-lg h-12">
                         <SelectValue placeholder="Выберите менеджера" />
                       </SelectTrigger>
-                      <SelectContent className="bg-popover border z-50">
+                      <SelectContent className="bg-popover border shadow-lg z-[100]">
                         <SelectItem value="">Не назначен</SelectItem>
                         {managers.map((manager) => (
-                          <SelectItem key={manager.id} value={manager.name}>
+                          <SelectItem key={manager.id} value={manager.name} className="cursor-pointer">
                             {manager.name}
                           </SelectItem>
                         ))}
