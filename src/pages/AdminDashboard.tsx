@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users } from "lucide-react";
+import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
@@ -101,14 +101,20 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
-          <Button
-            variant="ghost"
-            className="mb-6 text-primary hover:text-primary/80"
-            onClick={() => setShowClientCard(false)}
-          >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Вернуться к дашборду
-          </Button>
+          <div className="flex justify-between items-center mb-6">
+            <Button
+              variant="ghost"
+              className="text-primary hover:text-primary/80"
+              onClick={() => setShowClientCard(false)}
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Вернуться к дашборду
+            </Button>
+            <Button variant="outline" onClick={signOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Выйти
+            </Button>
+          </div>
 
           <Card className="bg-card text-foreground p-8 rounded-2xl shadow-lg">
             <h2 className="text-3xl font-light mb-8 pb-4 border-b border-border">
