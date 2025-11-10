@@ -34,10 +34,6 @@ const newClientSchema = z.object({
     .trim()
     .min(1, "Имя клиента обязательно")
     .max(100, "Имя не должно превышать 100 символов"),
-  managerName: z.string()
-    .trim()
-    .min(1, "Имя менеджера обязательно")
-    .max(100, "Имя не должно превышать 100 символов"),
   phone: z.string()
     .trim()
     .min(1, "Контактный номер обязателен")
@@ -54,7 +50,6 @@ export default function AdminDashboard() {
   const [aiStatus, setAiStatus] = useState("active");
   const [newCompanyName, setNewCompanyName] = useState("");
   const [newClientName, setNewClientName] = useState("");
-  const [newManagerName, setNewManagerName] = useState("");
   const [newPhone, setNewPhone] = useState("");
 
   const { data: clients = [], isLoading: clientsLoading } = useClients();
@@ -113,7 +108,6 @@ export default function AdminDashboard() {
     const result = newClientSchema.safeParse({
       companyName: newCompanyName,
       clientName: newClientName,
-      managerName: newManagerName,
       phone: newPhone
     });
     
@@ -125,13 +119,12 @@ export default function AdminDashboard() {
     await createClient.mutateAsync({
       company_name: newCompanyName,
       client_name: newClientName,
-      manager_name: newManagerName,
+      manager_name: null,
       phone: newPhone
     });
     
     setNewCompanyName("");
     setNewClientName("");
-    setNewManagerName("");
     setNewPhone("");
     setShowCreateForm(false);
   };
@@ -212,18 +205,6 @@ export default function AdminDashboard() {
                   value={newClientName}
                   onChange={(e) => setNewClientName(e.target.value)}
                   placeholder="Иван Иванов"
-                  className="mt-2"
-                  maxLength={100}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="managerName">Имя менеджера</Label>
-                <Input
-                  id="managerName"
-                  value={newManagerName}
-                  onChange={(e) => setNewManagerName(e.target.value)}
-                  placeholder="Петр Петров"
                   className="mt-2"
                   maxLength={100}
                 />

@@ -97,7 +97,7 @@ export function useCreateClient() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newClient: { company_name: string; client_name: string; manager_name: string; phone: string; email?: string }) => {
+    mutationFn: async (newClient: { company_name: string; client_name: string; manager_name: string | null; phone: string; email?: string }) => {
       // Create a new user account for the client if email provided
       if (newClient.email) {
         const tempPassword = Math.random().toString(36).slice(-8);
