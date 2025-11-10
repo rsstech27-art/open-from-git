@@ -23,8 +23,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
-
     // Fetch role helper
     const fetchRole = async (userId: string): Promise<UserRole | null> => {
       const { data } = await supabase
@@ -36,56 +34,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return (data?.role as UserRole) || null;
     };
 
-    // Initialize session
-    const initSession = async () => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      
-      if (!isMounted) return;
-
-      if (currentSession?.user) {
-        const userRole = await fetchRole(currentSession.user.id);
-        if (isMounted) {
-          setSession(currentSession);
-          setUser(currentSession.user);
-          setRole(userRole);
-        }
-      }
-      
-      if (isMounted) {
-        setLoading(false);
-      }
-    };
-
-    // Listen to auth changes
+    // Listen to auth changes FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        if (!isMounted) return;
-
-        if (newSession?.user) {
-          const userRole = await fetchRole(newSession.user.id);
-          if (isMounted) {
-            setSession(newSession);
-            setUser(newSession.user);
-            setRole(userRole);
-          }
-        } else {
-          if (isMounted) {
-            setSession(null);
-            setUser(null);
-            setRole(null);
-          }
-        }
+      (event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
         
-        if (isMounted) {
+        // Defer role fetching to avoid deadlock
+        if (newSession?.user) {
+          setTimeout(() => {
+            fetchRole(newSession.user.id).then(userRole => {
+              setRole(userRole);
+              setLoading(false);
+            });
+          }, 0);
+        } else {
+          setRole(null);
           setLoading(false);
         }
       }
     );
 
-    initSession();
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      
+      if (currentSession?.user) {
+        fetchRole(currentSession.user.id).then(userRole => {
+          setRole(userRole);
+          setLoading(false);
+        });
+      } else {
+        setLoading(false);
+      }
+    });
 
     return () => {
-      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
