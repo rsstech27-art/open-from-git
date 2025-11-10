@@ -85,52 +85,52 @@ export type Database = {
           autonomy: number
           business_hours_appointments: number | null
           client_id: string
+          confirmed_appointments: number | null
           conversion: number
           created_at: string
           date: string
-          financial_equiv: number
           id: string
           long_dialogs: number | null
           medium_dialogs: number | null
           non_business_hours_appointments: number | null
           period_type: string | null
-          retention_share: number
           satisfaction: number | null
           short_dialogs: number | null
+          time_saved_hours: number | null
         }
         Insert: {
           autonomy?: number
           business_hours_appointments?: number | null
           client_id: string
+          confirmed_appointments?: number | null
           conversion?: number
           created_at?: string
           date: string
-          financial_equiv?: number
           id?: string
           long_dialogs?: number | null
           medium_dialogs?: number | null
           non_business_hours_appointments?: number | null
           period_type?: string | null
-          retention_share?: number
           satisfaction?: number | null
           short_dialogs?: number | null
+          time_saved_hours?: number | null
         }
         Update: {
           autonomy?: number
           business_hours_appointments?: number | null
           client_id?: string
+          confirmed_appointments?: number | null
           conversion?: number
           created_at?: string
           date?: string
-          financial_equiv?: number
           id?: string
           long_dialogs?: number | null
           medium_dialogs?: number | null
           non_business_hours_appointments?: number | null
           period_type?: string | null
-          retention_share?: number
           satisfaction?: number | null
           short_dialogs?: number | null
+          time_saved_hours?: number | null
         }
         Relationships: [
           {
