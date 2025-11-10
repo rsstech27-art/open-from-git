@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, TrendingUp, DollarSign, Users } from "lucide-react";
+import { MessageSquare, TrendingUp, DollarSign, Users, LogOut } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
@@ -36,9 +36,13 @@ export default function ClientDashboard() {
 
   if (!client) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="p-8">
-          <p className="text-foreground">Клиент не найден. Обратитесь к администратору.</p>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="p-8 max-w-md w-full text-center space-y-4">
+          <p className="text-foreground mb-4">Клиент не найден. Обратитесь к администратору.</p>
+          <Button variant="outline" onClick={signOut} className="w-full">
+            <LogOut className="w-4 h-4 mr-2" />
+            Выйти
+          </Button>
         </Card>
       </div>
     );
