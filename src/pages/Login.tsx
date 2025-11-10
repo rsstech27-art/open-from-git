@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -13,25 +14,21 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
-  const { loading: redirecting } = useAuthRedirect();
+  const { user, signIn, signUp } = useAuth();
+  const { role, loading: roleLoading } = useUserRole();
+  const navigate = useNavigate();
 
-  console.log('[Login] Rendering, redirecting:', redirecting);
-
-  // Show loading screen during redirect
-  if (redirecting) {
-    console.log('[Login] Showing redirecting screen');
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Загрузка...</div>
-      </div>
-    );
-  }
+  // Redirect authenticated users to their dashboard
+  useEffect(() => {
+    if (user && role && !roleLoading) {
+      const path = role === "admin" ? "/admin" : "/client";
+      navigate(path, { replace: true });
+    }
+  }, [user, role, roleLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    console.log('[Login] Submit started, isRegister:', isRegister);
 
     try {
       if (isRegister) {
@@ -41,43 +38,36 @@ export default function Login() {
           return;
         }
 
-        console.log('[Login] Calling signUp');
         const { error } = await signUp(email, password, fullName);
         
         if (error) {
-          console.error('[Login] SignUp error:', error);
           if (error.message.includes("already registered")) {
             toast.error("Этот email уже зарегистрирован");
           } else {
             toast.error(error.message);
           }
         } else {
-          console.log('[Login] SignUp successful');
           toast.success("Регистрация успешна! Войдите в систему.");
           setIsRegister(false);
         }
       } else {
-        console.log('[Login] Calling signIn');
         const { error } = await signIn(email, password);
         
         if (error) {
-          console.error('[Login] SignIn error:', error);
           if (error.message.includes("Invalid login credentials")) {
             toast.error("Неверный email или пароль");
           } else {
             toast.error(error.message);
           }
         } else {
-          console.log('[Login] SignIn successful');
           toast.success("Вход выполнен успешно!");
+          // Navigation will happen automatically via useEffect
         }
       }
     } catch (error) {
-      console.error('[Login] Unexpected error:', error);
       toast.error("Произошла ошибка. Попробуйте снова.");
     } finally {
       setLoading(false);
-      console.log('[Login] Submit finished');
     }
   };
 

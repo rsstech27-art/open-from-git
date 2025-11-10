@@ -10,27 +10,18 @@ export function useAuth() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('[useAuth] Hook initialized');
-    
-    // Get initial session synchronously
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('[useAuth] Initial session:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[useAuth] Auth state changed:', event, 'user:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
     });
 
-    return () => {
-      console.log('[useAuth] Cleanup');
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {

@@ -12,16 +12,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
 
-  console.log('[ProtectedRoute] State:', { 
-    authLoading, 
-    roleLoading, 
-    hasUser: !!user, 
-    role,
-    requiredRole 
-  });
-
   if (authLoading || roleLoading) {
-    console.log('[ProtectedRoute] Loading...');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Загрузка...</div>
@@ -30,15 +21,12 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   }
 
   if (!user) {
-    console.log('[ProtectedRoute] No user, redirecting to /');
     return <Navigate to="/" replace />;
   }
 
   if (requiredRole && role !== requiredRole) {
-    console.log('[ProtectedRoute] Role mismatch, redirecting to /');
     return <Navigate to="/" replace />;
   }
 
-  console.log('[ProtectedRoute] Rendering children');
   return <>{children}</>;
 }
