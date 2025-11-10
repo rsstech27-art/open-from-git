@@ -516,7 +516,7 @@ export default function AdminDashboard() {
                       const phoneNumber = parsePhoneNumber(selectedClient.phone, 'RU');
                       if (phoneNumber.isValid()) {
                         const cleanNumber = phoneNumber.number.replace(/\+/g, '');
-                        const message = encodeURIComponent(`Здравствуйте! Это сообщение от ${selectedClient.company_name}.`);
+                        const message = encodeURIComponent('Здравствуйте, это Анна! Я пишу Вам по поводу работы вашего ИИ-ассистента.');
                         
                         const handleWhatsAppClick = () => {
                           // Try web.whatsapp.com instead of wa.me if blocked
