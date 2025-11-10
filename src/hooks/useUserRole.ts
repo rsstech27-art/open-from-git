@@ -10,19 +10,25 @@ export function useUserRole() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('[useUserRole] Effect triggered, user:', user?.id);
+    
     if (!user) {
+      console.log('[useUserRole] No user, clearing role');
       setRole(null);
       setLoading(false);
       return;
     }
 
     const fetchRole = async () => {
-      const { data } = await supabase
+      console.log('[useUserRole] Fetching role for user:', user.id);
+      const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
         .maybeSingle();
 
+      console.log('[useUserRole] Role fetched:', data, 'error:', error);
+      
       if (data) {
         setRole(data.role as UserRole);
       }

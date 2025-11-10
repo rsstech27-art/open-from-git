@@ -16,8 +16,11 @@ export default function Login() {
   const { signIn, signUp } = useAuth();
   const { loading: redirecting } = useAuthRedirect();
 
+  console.log('[Login] Rendering, redirecting:', redirecting);
+
   // Show loading screen during redirect
   if (redirecting) {
+    console.log('[Login] Showing redirecting screen');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Загрузка...</div>
@@ -28,6 +31,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    console.log('[Login] Submit started, isRegister:', isRegister);
 
     try {
       if (isRegister) {
@@ -37,35 +41,43 @@ export default function Login() {
           return;
         }
 
+        console.log('[Login] Calling signUp');
         const { error } = await signUp(email, password, fullName);
         
         if (error) {
+          console.error('[Login] SignUp error:', error);
           if (error.message.includes("already registered")) {
             toast.error("Этот email уже зарегистрирован");
           } else {
             toast.error(error.message);
           }
         } else {
+          console.log('[Login] SignUp successful');
           toast.success("Регистрация успешна! Войдите в систему.");
           setIsRegister(false);
         }
       } else {
+        console.log('[Login] Calling signIn');
         const { error } = await signIn(email, password);
         
         if (error) {
+          console.error('[Login] SignIn error:', error);
           if (error.message.includes("Invalid login credentials")) {
             toast.error("Неверный email или пароль");
           } else {
             toast.error(error.message);
           }
         } else {
+          console.log('[Login] SignIn successful');
           toast.success("Вход выполнен успешно!");
         }
       }
     } catch (error) {
+      console.error('[Login] Unexpected error:', error);
       toast.error("Произошла ошибка. Попробуйте снова.");
     } finally {
       setLoading(false);
+      console.log('[Login] Submit finished');
     }
   };
 
