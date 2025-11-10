@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { useAuth } from "@/contexts/AuthContext";
-import { useClients, useClient, useUpdateClient, useCreateClient } from "@/hooks/useClients";
+import { useClients, useClient, useUpdateClient, useCreateClient, useUpdateClientEmail } from "@/hooks/useClients";
 import { useManagers } from "@/hooks/useManagers";
 import { useMetrics, useCreateMetric } from "@/hooks/useMetrics";
 
@@ -56,6 +56,8 @@ export default function AdminDashboard() {
   const [newClientName, setNewClientName] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [showEmailDialog, setShowEmailDialog] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
   const [previewMetrics, setPreviewMetrics] = useState<{
     conversion: number;
     autonomy: number;
@@ -76,6 +78,7 @@ export default function AdminDashboard() {
   const updateClient = useUpdateClient();
   const createClient = useCreateClient();
   const createMetric = useCreateMetric();
+  const updateClientEmail = useUpdateClientEmail();
 
   // Generate periods starting from October 2025
   const generatePeriods = () => {
@@ -295,6 +298,30 @@ export default function AdminDashboard() {
     setNewClientName("");
     setNewPhone("");
     setShowCreateForm(false);
+  };
+
+  const handleUpdateEmail = async () => {
+    if (!selectedClient) {
+      toast.error("Клиент не выбран");
+      return;
+    }
+
+    if (!newEmail || !newEmail.includes("@")) {
+      toast.error("Введите корректный email");
+      return;
+    }
+
+    try {
+      await updateClientEmail.mutateAsync({
+        userId: selectedClient.user_id,
+        clientId: selectedClient.id,
+        newEmail: newEmail,
+      });
+      setShowEmailDialog(false);
+      setNewEmail("");
+    } catch (error) {
+      console.error("Error updating email:", error);
+    }
   };
 
   const handleManagerChange = async (managerName: string) => {
@@ -519,12 +546,23 @@ export default function AdminDashboard() {
               </h3>
 
               <Card className="bg-muted border p-6 space-y-4 rounded-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                  <p className="text-sm text-foreground/70">Email клиента:</p>
-                  <p className="text-lg font-mono text-foreground">Связан с аккаунтом</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-sm text-foreground/70 mb-1">Email клиента:</p>
+                    <p className="text-lg font-mono text-foreground">{selectedClient?.email || "Не указан"}</p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setNewEmail(selectedClient?.email || "");
+                      setShowEmailDialog(true);
+                    }}
+                  >
+                    Изменить email
+                  </Button>
                 </div>
                 <div className="text-sm text-muted-foreground mt-4 p-3 bg-background rounded-lg border border-border">
-                  <p>Для сброса пароля используйте функцию восстановления пароля в системе аутентификации.</p>
+                  <p>При изменении email клиента будут обновлены данные для входа в систему.</p>
                 </div>
               </Card>
             </div>
@@ -966,6 +1004,42 @@ export default function AdminDashboard() {
                 disabled={createMetric.isPending}
               >
                 {createMetric.isPending ? "Сохранение..." : "Подтвердить и сохранить"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Update Dialog */}
+        <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Изменить email клиента</DialogTitle>
+              <DialogDescription>
+                Новый email будет использоваться для входа в систему
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="new-email">Новый email</Label>
+                <Input
+                  id="new-email"
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="client@example.com"
+                  className="mt-2"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEmailDialog(false)}>
+                Отмена
+              </Button>
+              <Button 
+                onClick={handleUpdateEmail}
+                disabled={updateClientEmail.isPending}
+              >
+                {updateClientEmail.isPending ? "Изменение..." : "Изменить"}
               </Button>
             </DialogFooter>
           </DialogContent>
