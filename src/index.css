@@ -97,4 +97,28 @@ All colors MUST be HSL.
   [data-radix-popper-content-wrapper] {
     z-index: 50 !important;
   }
+
+  @keyframes gradient-animation {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .animated-gradient-bg {
+    background: linear-gradient(
+      -45deg,
+      hsl(var(--gradient-purple-start)),
+      hsl(var(--gradient-cyan-start)),
+      hsl(var(--gradient-salmon-start)),
+      hsl(var(--gradient-green-start))
+    );
+    background-size: 400% 400%;
+    animation: gradient-animation 15s ease infinite;
+  }
 }

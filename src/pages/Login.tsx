@@ -111,7 +111,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen animated-gradient-bg flex items-center justify-center p-4">
       {user && (
         <div className="absolute top-4 right-4">
           <Button variant="outline" size="sm" onClick={signOut}>
