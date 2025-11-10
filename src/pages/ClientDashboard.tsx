@@ -170,7 +170,9 @@ export default function ClientDashboard() {
                     const message = encodeURIComponent(`Здравствуйте! Пишу вам по поводу ИИ-ассистента для ${client.company_name}.`);
                     
                     const handleWhatsAppClick = () => {
-                      window.open(`https://web.whatsapp.com/send?phone=${cleanNumber}&text=${message}`, '_blank');
+                      // Try web.whatsapp.com instead of wa.me if blocked
+                      const waUrl = `https://wa.me/${cleanNumber}?text=${message}`;
+                      window.open(waUrl, '_blank');
                     };
                     
                     return (
