@@ -73,11 +73,10 @@ export function useCreateMetric() {
       const { data, error } = await supabase
         .from("metrics")
         .upsert(metric, {
-          onConflict: 'client_id,date',
-          ignoreDuplicates: false
+          onConflict: 'client_id,date'
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
