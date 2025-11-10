@@ -54,6 +54,7 @@ export default function ClientDashboard() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-light">Личный кабинет</h1>
           <Button variant="outline" onClick={signOut}>
+            <LogOut className="w-4 h-4 mr-2" />
             Выйти
           </Button>
         </div>
