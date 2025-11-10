@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut, Plus, CheckCircle2, AlertCircle, Smile, Clock } from "lucide-react";
+import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut, Plus, CheckCircle2, AlertCircle, Smile } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
@@ -64,7 +64,9 @@ export default function AdminDashboard() {
     satisfaction: number;
     business_hours_appointments: number;
     non_business_hours_appointments: number;
-    avg_response_speed_seconds: number;
+    short_dialogs: number;
+    medium_dialogs: number;
+    long_dialogs: number;
   } | null>(null);
 
   const { data: clients = [], isLoading: clientsLoading } = useClients();
@@ -105,7 +107,9 @@ export default function AdminDashboard() {
     satisfaction: 0,
     business_hours_appointments: 0,
     non_business_hours_appointments: 0,
-    avg_response_speed_seconds: 0,
+    short_dialogs: 0,
+    medium_dialogs: 0,
+    long_dialogs: 0,
   };
 
   // Set first client as selected when clients load
@@ -122,7 +126,9 @@ export default function AdminDashboard() {
     const satisfactionMatch = data.match(/удовлетворенност[ьи][\s:]+(\d+[.,]?\d*)/i);
     const businessHoursMatch = data.match(/рабоч[иеа]+\s+врем[яи]+[\s:]+(\d+)/i);
     const nonBusinessHoursMatch = data.match(/нерабоч[иеа]+\s+врем[яи]+[\s:]+(\d+)/i);
-    const responseSpeedMatch = data.match(/скорост[ьи]\s+ответ[аов]+[\s:]+(\d+)/i);
+    const shortDialogsMatch = data.match(/коротк[иеа]+\s+диалог[иова]+[\s:]+(\d+)/i);
+    const mediumDialogsMatch = data.match(/средн[иеа]+\s+диалог[иова]+[\s:]+(\d+)/i);
+    const longDialogsMatch = data.match(/длинн[ыеа]+\s+диалог[иова]+[\s:]+(\d+)/i);
 
     return {
       conversion: conversionMatch ? parseFloat(conversionMatch[1].replace(',', '.')) / 100 : 0,
@@ -132,7 +138,9 @@ export default function AdminDashboard() {
       satisfaction: satisfactionMatch ? parseFloat(satisfactionMatch[1].replace(',', '.')) / 100 : 0,
       business_hours_appointments: businessHoursMatch ? parseInt(businessHoursMatch[1]) : 0,
       non_business_hours_appointments: nonBusinessHoursMatch ? parseInt(nonBusinessHoursMatch[1]) : 0,
-      avg_response_speed_seconds: responseSpeedMatch ? parseInt(responseSpeedMatch[1]) : 0,
+      short_dialogs: shortDialogsMatch ? parseInt(shortDialogsMatch[1]) : 0,
+      medium_dialogs: mediumDialogsMatch ? parseInt(mediumDialogsMatch[1]) : 0,
+      long_dialogs: longDialogsMatch ? parseInt(longDialogsMatch[1]) : 0,
     };
   };
 
@@ -176,7 +184,9 @@ export default function AdminDashboard() {
         satisfaction: previewMetrics.satisfaction,
         business_hours_appointments: previewMetrics.business_hours_appointments,
         non_business_hours_appointments: previewMetrics.non_business_hours_appointments,
-        avg_response_speed_seconds: previewMetrics.avg_response_speed_seconds,
+        short_dialogs: previewMetrics.short_dialogs,
+        medium_dialogs: previewMetrics.medium_dialogs,
+        long_dialogs: previewMetrics.long_dialogs,
       });
 
       setClientData("");
@@ -601,15 +611,6 @@ export default function AdminDashboard() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <KpiCard
-                title="Средняя скорость ответа"
-                value={`${latestMetric.avg_response_speed_seconds} сек`}
-                icon={Clock}
-                gradient="cyan"
-              />
-            </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {viewMode !== "month" && (
                 <>
@@ -660,6 +661,15 @@ export default function AdminDashboard() {
                 ]}
                 colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)"]}
               />
+              <DoughnutChartCard
+                title="Длительность диалогов"
+                data={[
+                  { name: "Короткие", value: latestMetric.short_dialogs },
+                  { name: "Средние", value: latestMetric.medium_dialogs },
+                  { name: "Длинные", value: latestMetric.long_dialogs },
+                ]}
+                colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)", "hsl(0 70% 60%)"]}
+              />
             </div>
           </div>
         </div>
@@ -691,7 +701,7 @@ export default function AdminDashboard() {
                 id="clientData"
                 className="bg-muted border text-foreground mt-2 rounded-lg"
                 rows={8}
-                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 50000, повторные 45%, удовлетворенность 90%, рабочее время 120, нерабочее время 30, скорость ответа 15)"
+                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 50000, повторные 45%, удовлетворенность 90%, рабочее время 120, нерабочее время 30, короткие диалоги 50, средние диалоги 30, длинные диалоги 20)"
                 value={clientData}
                 onChange={(e) => setClientData(e.target.value)}
                 maxLength={5000}
@@ -830,28 +840,59 @@ export default function AdminDashboard() {
                 <Card className="p-4 bg-muted">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Clock className="w-5 h-5 text-green-500" />
-                      <span className="font-medium">Средняя скорость ответа</span>
+                      <MessageSquare className="w-5 h-5 text-cyan-500" />
+                      <span className="font-medium">Короткие диалоги</span>
                     </div>
-                    {previewMetrics.avg_response_speed_seconds > 0 ? (
+                    {previewMetrics.short_dialogs > 0 ? (
                       <CheckCircle2 className="w-5 h-5 text-green-500" />
                     ) : (
                       <AlertCircle className="w-5 h-5 text-yellow-500" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{previewMetrics.avg_response_speed_seconds} сек</p>
+                  <p className="text-2xl font-light">{previewMetrics.short_dialogs}</p>
+                </Card>
+
+                <Card className="p-4 bg-muted">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-purple-500" />
+                      <span className="font-medium">Средние диалоги</span>
+                    </div>
+                    {previewMetrics.medium_dialogs > 0 ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-2xl font-light">{previewMetrics.medium_dialogs}</p>
+                </Card>
+
+                <Card className="p-4 bg-muted">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-red-500" />
+                      <span className="font-medium">Длинные диалоги</span>
+                    </div>
+                    {previewMetrics.long_dialogs > 0 ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-2xl font-light">{previewMetrics.long_dialogs}</p>
                 </Card>
 
                 {(previewMetrics.conversion === 0 || previewMetrics.autonomy === 0 || 
                   previewMetrics.financial_equiv === 0 || previewMetrics.retention_share === 0 ||
                   previewMetrics.satisfaction === 0 || previewMetrics.business_hours_appointments === 0 ||
-                  previewMetrics.non_business_hours_appointments === 0 || previewMetrics.avg_response_speed_seconds === 0) && (
+                  previewMetrics.non_business_hours_appointments === 0 || previewMetrics.short_dialogs === 0 ||
+                  previewMetrics.medium_dialogs === 0 || previewMetrics.long_dialogs === 0) && (
                   <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                     <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
                     <div className="text-sm">
                       <p className="font-medium text-yellow-700 dark:text-yellow-400">Некоторые метрики не распознаны</p>
                       <p className="text-muted-foreground mt-1">
-                        Убедитесь, что данные содержат ключевые слова: конверсия, автономность, экономия, повторные, удовлетворенность, рабочее время, нерабочее время, скорость ответа
+                        Убедитесь, что данные содержат ключевые слова: конверсия, автономность, экономия, повторные, удовлетворенность, рабочее время, нерабочее время, короткие диалоги, средние диалоги, длинные диалоги
                       </p>
                     </div>
                   </div>

@@ -13,7 +13,9 @@ export interface Metric {
   satisfaction: number;
   business_hours_appointments: number;
   non_business_hours_appointments: number;
-  avg_response_speed_seconds: number;
+  short_dialogs: number;
+  medium_dialogs: number;
+  long_dialogs: number;
   period_type: string | null;
   created_at: string;
 }

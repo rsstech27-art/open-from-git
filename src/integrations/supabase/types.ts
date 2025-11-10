@@ -83,7 +83,6 @@ export type Database = {
       metrics: {
         Row: {
           autonomy: number
-          avg_response_speed_seconds: number | null
           business_hours_appointments: number | null
           client_id: string
           conversion: number
@@ -91,14 +90,16 @@ export type Database = {
           date: string
           financial_equiv: number
           id: string
+          long_dialogs: number | null
+          medium_dialogs: number | null
           non_business_hours_appointments: number | null
           period_type: string | null
           retention_share: number
           satisfaction: number | null
+          short_dialogs: number | null
         }
         Insert: {
           autonomy?: number
-          avg_response_speed_seconds?: number | null
           business_hours_appointments?: number | null
           client_id: string
           conversion?: number
@@ -106,14 +107,16 @@ export type Database = {
           date: string
           financial_equiv?: number
           id?: string
+          long_dialogs?: number | null
+          medium_dialogs?: number | null
           non_business_hours_appointments?: number | null
           period_type?: string | null
           retention_share?: number
           satisfaction?: number | null
+          short_dialogs?: number | null
         }
         Update: {
           autonomy?: number
-          avg_response_speed_seconds?: number | null
           business_hours_appointments?: number | null
           client_id?: string
           conversion?: number
@@ -121,10 +124,13 @@ export type Database = {
           date?: string
           financial_equiv?: number
           id?: string
+          long_dialogs?: number | null
+          medium_dialogs?: number | null
           non_business_hours_appointments?: number | null
           period_type?: string | null
           retention_share?: number
           satisfaction?: number | null
+          short_dialogs?: number | null
         }
         Relationships: [
           {
