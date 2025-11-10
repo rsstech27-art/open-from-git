@@ -4,7 +4,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut, Plus } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
@@ -13,7 +14,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { useAuth } from "@/contexts/AuthContext";
-import { useClients, useClient, useUpdateClient } from "@/hooks/useClients";
+import { useClients, useClient, useUpdateClient, useCreateClient } from "@/hooks/useClients";
 import { useMetrics } from "@/hooks/useMetrics";
 
 const clientDataSchema = z.object({
@@ -23,18 +24,33 @@ const clientDataSchema = z.object({
     .max(5000, "Данные не должны превышать 5000 символов")
 });
 
+const newClientSchema = z.object({
+  companyName: z.string()
+    .trim()
+    .min(1, "Название компании обязательно")
+    .max(100, "Название не должно превышать 100 символов"),
+  phone: z.string()
+    .trim()
+    .min(1, "Контактный номер обязателен")
+    .max(20, "Номер не должен превышать 20 символов")
+});
+
 export default function AdminDashboard() {
   const { signOut } = useAuth();
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [period, setPeriod] = useState("month");
   const [showClientCard, setShowClientCard] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [clientData, setClientData] = useState("");
   const [aiStatus, setAiStatus] = useState("active");
+  const [newCompanyName, setNewCompanyName] = useState("");
+  const [newPhone, setNewPhone] = useState("");
 
   const { data: clients = [], isLoading: clientsLoading } = useClients();
   const { data: selectedClient } = useClient(selectedClientId);
   const { data: metrics = [] } = useMetrics(selectedClientId, period);
   const updateClient = useUpdateClient();
+  const createClient = useCreateClient();
   
   const latestMetric = metrics[metrics.length - 1] || {
     conversion: 0,
@@ -79,6 +95,29 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleCreateClient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const result = newClientSchema.safeParse({
+      companyName: newCompanyName,
+      phone: newPhone
+    });
+    
+    if (!result.success) {
+      toast.error(result.error.errors[0].message);
+      return;
+    }
+
+    await createClient.mutateAsync({
+      company_name: newCompanyName,
+      phone: newPhone
+    });
+    
+    setNewCompanyName("");
+    setNewPhone("");
+    setShowCreateForm(false);
+  };
+
   if (clientsLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -87,12 +126,81 @@ export default function AdminDashboard() {
     );
   }
 
-  if (clients.length === 0) {
+  if (clients.length === 0 && !showCreateForm) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="p-8">
-          <p className="text-foreground">Нет клиентов в системе. Добавьте клиентов для начала работы.</p>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="p-8 max-w-md w-full">
+          <h2 className="text-xl font-light mb-4">Нет клиентов в системе</h2>
+          <p className="text-muted-foreground mb-6">Добавьте первого клиента для начала работы</p>
+          <Button 
+            onClick={() => setShowCreateForm(true)} 
+            className="w-full"
+            variant="secondary"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Добавить клиента
+          </Button>
         </Card>
+      </div>
+    );
+  }
+
+  if (showCreateForm) {
+    return (
+      <div className="min-h-screen bg-background p-4 md:p-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <Button
+              variant="ghost"
+              onClick={() => setShowCreateForm(false)}
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Назад
+            </Button>
+            <Button variant="outline" onClick={signOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Выйти
+            </Button>
+          </div>
+
+          <Card className="p-8">
+            <h2 className="text-2xl font-light mb-6">Добавить нового клиента</h2>
+            <form onSubmit={handleCreateClient} className="space-y-6">
+              <div>
+                <Label htmlFor="companyName">Название компании</Label>
+                <Input
+                  id="companyName"
+                  value={newCompanyName}
+                  onChange={(e) => setNewCompanyName(e.target.value)}
+                  placeholder="ООО Компания"
+                  className="mt-2"
+                  maxLength={100}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="phone">Контактный номер</Label>
+                <Input
+                  id="phone"
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                  placeholder="+7 (999) 123-45-67"
+                  className="mt-2"
+                  maxLength={20}
+                />
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full"
+                variant="secondary"
+                disabled={createClient.isPending}
+              >
+                {createClient.isPending ? "Создание..." : "Создать клиента"}
+              </Button>
+            </form>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -197,10 +305,16 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-light">Панель администратора</h1>
-          <Button variant="outline" onClick={signOut}>
-            <LogOut className="w-4 h-4 mr-2" />
-            Выйти
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowCreateForm(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Добавить клиента
+            </Button>
+            <Button variant="outline" onClick={signOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Выйти
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">

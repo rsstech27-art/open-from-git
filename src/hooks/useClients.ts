@@ -91,3 +91,37 @@ export function useUpdateClient() {
     },
   });
 }
+
+export function useCreateClient() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (newClient: { company_name: string; phone: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) throw new Error("Не авторизован");
+
+      const { data, error } = await supabase
+        .from("clients")
+        .insert({
+          company_name: newClient.company_name,
+          phone: newClient.phone,
+          user_id: user.id,
+          status: "active"
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      toast.success("Клиент успешно добавлен");
+    },
+    onError: (error) => {
+      toast.error("Ошибка при создании клиента");
+      console.error(error);
+    },
+  });
+}
