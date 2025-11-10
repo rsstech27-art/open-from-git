@@ -72,7 +72,10 @@ export function useCreateMetric() {
     mutationFn: async (metric: Omit<Metric, "id" | "created_at">) => {
       const { data, error } = await supabase
         .from("metrics")
-        .insert(metric)
+        .upsert(metric, {
+          onConflict: 'client_id,date',
+          ignoreDuplicates: false
+        })
         .select()
         .single();
 
@@ -81,10 +84,10 @@ export function useCreateMetric() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["metrics"] });
-      toast.success("Метрика добавлена");
+      toast.success("Метрика сохранена");
     },
     onError: (error) => {
-      toast.error("Ошибка при добавлении метрики");
+      toast.error("Ошибка при сохранении метрики");
       console.error(error);
     },
   });
