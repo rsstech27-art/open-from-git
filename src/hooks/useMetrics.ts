@@ -10,6 +10,7 @@ export interface Metric {
   autonomy: number;
   financial_equiv: number;
   retention_share: number;
+  satisfaction: number;
   period_type: string | null;
   created_at: string;
 }

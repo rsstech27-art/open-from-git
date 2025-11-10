@@ -91,6 +91,7 @@ export type Database = {
           id: string
           period_type: string | null
           retention_share: number
+          satisfaction: number | null
         }
         Insert: {
           autonomy?: number
@@ -102,6 +103,7 @@ export type Database = {
           id?: string
           period_type?: string | null
           retention_share?: number
+          satisfaction?: number | null
         }
         Update: {
           autonomy?: number
@@ -113,6 +115,7 @@ export type Database = {
           id?: string
           period_type?: string | null
           retention_share?: number
+          satisfaction?: number | null
         }
         Relationships: [
           {

@@ -6,11 +6,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut, Plus, CheckCircle2, AlertCircle } from "lucide-react";
+import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut, Plus, CheckCircle2, AlertCircle, Smile } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
 import DoughnutChartCard from "@/components/dashboard/DoughnutChartCard";
+import GaugeChartCard from "@/components/dashboard/GaugeChartCard";
 import { toast } from "sonner";
 import { z } from "zod";
 import { parsePhoneNumber } from 'libphonenumber-js';
@@ -60,6 +61,7 @@ export default function AdminDashboard() {
     autonomy: number;
     financial_equiv: number;
     retention_share: number;
+    satisfaction: number;
   } | null>(null);
 
   const { data: clients = [], isLoading: clientsLoading } = useClients();
@@ -97,6 +99,7 @@ export default function AdminDashboard() {
     autonomy: 0,
     financial_equiv: 0,
     retention_share: 0,
+    satisfaction: 0,
   };
 
   // Set first client as selected when clients load
@@ -110,12 +113,14 @@ export default function AdminDashboard() {
     const autonomyMatch = data.match(/автономност[ьи][\s:]+(\d+[.,]?\d*)/i);
     const financialMatch = data.match(/эконом[иія]+[\s:]+(\d+[.,]?\d*)/i);
     const retentionMatch = data.match(/повторн[ыхе]+[\s:]+(\d+[.,]?\d*)/i);
+    const satisfactionMatch = data.match(/удовлетворенност[ьи][\s:]+(\d+[.,]?\d*)/i);
 
     return {
       conversion: conversionMatch ? parseFloat(conversionMatch[1].replace(',', '.')) / 100 : 0,
       autonomy: autonomyMatch ? parseFloat(autonomyMatch[1].replace(',', '.')) / 100 : 0,
       financial_equiv: financialMatch ? parseInt(financialMatch[1].replace(/[.,]/g, '')) : 0,
       retention_share: retentionMatch ? parseFloat(retentionMatch[1].replace(',', '.')) / 100 : 0,
+      satisfaction: satisfactionMatch ? parseFloat(satisfactionMatch[1].replace(',', '.')) / 100 : 0,
     };
   };
 
@@ -156,6 +161,7 @@ export default function AdminDashboard() {
         autonomy: previewMetrics.autonomy,
         financial_equiv: previewMetrics.financial_equiv,
         retention_share: previewMetrics.retention_share,
+        satisfaction: previewMetrics.satisfaction,
       });
 
       setClientData("");
@@ -605,6 +611,11 @@ export default function AdminDashboard() {
                 }))}
                 color="hsl(189 94% 43%)"
               />
+              <GaugeChartCard
+                title="Удовлетворенность клиента"
+                value={latestMetric.satisfaction}
+                icon={<Smile className="h-4 w-4 text-muted-foreground" />}
+              />
               <DoughnutChartCard
                 title="Новые / Повторные клиенты"
                 data={[
@@ -735,14 +746,30 @@ export default function AdminDashboard() {
                   <p className="text-2xl font-light">{(previewMetrics.retention_share * 100).toFixed(1)}%</p>
                 </Card>
 
+                <Card className="p-4 bg-muted">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Smile className="w-5 h-5 text-blue-500" />
+                      <span className="font-medium">Удовлетворенность клиента</span>
+                    </div>
+                    {previewMetrics.satisfaction > 0 ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-2xl font-light">{(previewMetrics.satisfaction * 100).toFixed(1)}%</p>
+                </Card>
+
                 {(previewMetrics.conversion === 0 || previewMetrics.autonomy === 0 || 
-                  previewMetrics.financial_equiv === 0 || previewMetrics.retention_share === 0) && (
+                  previewMetrics.financial_equiv === 0 || previewMetrics.retention_share === 0 ||
+                  previewMetrics.satisfaction === 0) && (
                   <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                     <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
                     <div className="text-sm">
                       <p className="font-medium text-yellow-700 dark:text-yellow-400">Некоторые метрики не распознаны</p>
                       <p className="text-muted-foreground mt-1">
-                        Убедитесь, что данные содержат ключевые слова: конверсия, автономность, экономия, повторные
+                        Убедитесь, что данные содержат ключевые слова: конверсия, автономность, экономия, повторные, удовлетворенность
                       </p>
                     </div>
                   </div>
