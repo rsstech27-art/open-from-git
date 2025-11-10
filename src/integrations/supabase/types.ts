@@ -47,6 +47,33 @@ export type Database = {
         }
         Relationships: []
       }
+      managers: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       metrics: {
         Row: {
           autonomy: number

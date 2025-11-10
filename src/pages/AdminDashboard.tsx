@@ -15,6 +15,7 @@ import { z } from "zod";
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { useAuth } from "@/contexts/AuthContext";
 import { useClients, useClient, useUpdateClient, useCreateClient } from "@/hooks/useClients";
+import { useManagers } from "@/hooks/useManagers";
 import { useMetrics } from "@/hooks/useMetrics";
 
 const clientDataSchema = z.object({
@@ -53,6 +54,7 @@ export default function AdminDashboard() {
 
   const { data: clients = [], isLoading: clientsLoading } = useClients();
   const { data: selectedClient } = useClient(selectedClientId);
+  const { data: managers = [] } = useManagers();
   const { data: metrics = [] } = useMetrics(selectedClientId, period);
   const updateClient = useUpdateClient();
   const createClient = useCreateClient();
@@ -124,6 +126,15 @@ export default function AdminDashboard() {
     setNewManagerName("");
     setNewPhone("");
     setShowCreateForm(false);
+  };
+
+  const handleManagerChange = async (managerName: string) => {
+    if (!selectedClientId) return;
+    
+    await updateClient.mutateAsync({
+      id: selectedClientId,
+      updates: { manager_name: managerName },
+    });
   };
 
   if (clientsLoading) {
@@ -250,11 +261,28 @@ export default function AdminDashboard() {
             </h2>
 
             <div className="space-y-6">
-              <Card className="bg-muted border p-4 flex items-start space-x-4 rounded-xl">
-                <Users className="w-8 h-8 text-primary" />
-                <div>
-                  <p className="text-sm text-foreground/70">Закрепленный менеджер</p>
-                  <p className="text-xl font-light text-foreground">{selectedClient?.manager_name || "Не указан"}</p>
+              <Card className="bg-muted border p-4 rounded-xl">
+                <div className="flex items-start space-x-4">
+                  <Users className="w-8 h-8 text-primary" />
+                  <div className="flex-1">
+                    <Label className="text-sm text-foreground/70 mb-2 block">Закрепленный менеджер</Label>
+                    <Select 
+                      value={selectedClient?.manager_name || ""} 
+                      onValueChange={handleManagerChange}
+                    >
+                      <SelectTrigger className="bg-background border text-foreground rounded-lg">
+                        <SelectValue placeholder="Выберите менеджера" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover border z-50">
+                        <SelectItem value="">Не назначен</SelectItem>
+                        {managers.map((manager) => (
+                          <SelectItem key={manager.id} value={manager.name}>
+                            {manager.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </Card>
 
