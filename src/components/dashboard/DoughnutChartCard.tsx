@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 interface DoughnutChartCardProps {
   title: string;
@@ -19,6 +19,15 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
     );
   }
 
+  // Calculate total for percentage
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+
+  // Custom label to show percentage
+  const renderLabel = (entry: any) => {
+    const percent = total > 0 ? ((entry.value / total) * 100).toFixed(1) : 0;
+    return `${percent}%`;
+  };
+
   return (
     <Card className="bg-card text-foreground p-6 shadow-lg rounded-2xl">
       <p className="text-base font-light mb-4">{title}</p>
@@ -33,11 +42,14 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
               outerRadius={100}
               paddingAngle={5}
               dataKey="value"
+              label={renderLabel}
+              labelLine={false}
             >
               {data.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
               ))}
             </Pie>
+            <Tooltip />
             <Legend
               wrapperStyle={{ color: "hsl(var(--foreground))" }}
               iconType="circle"

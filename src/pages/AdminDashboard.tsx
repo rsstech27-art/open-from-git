@@ -99,18 +99,67 @@ export default function AdminDashboard() {
 
   const periods = generatePeriods();
   
-  const latestMetric = metrics[metrics.length - 1] || {
-    conversion: 0,
-    autonomy: 0,
-    time_saved_hours: 0,
-    confirmed_appointments: 0,
-    satisfaction: 0,
-    business_hours_appointments: 0,
-    non_business_hours_appointments: 0,
-    short_dialogs: 0,
-    medium_dialogs: 0,
-    long_dialogs: 0,
-  };
+  // Aggregate metrics based on view mode
+  const aggregatedMetric = (() => {
+    if (metrics.length === 0) {
+      return {
+        conversion: 0,
+        autonomy: 0,
+        time_saved_hours: 0,
+        confirmed_appointments: 0,
+        satisfaction: 0,
+        business_hours_appointments: 0,
+        non_business_hours_appointments: 0,
+        short_dialogs: 0,
+        medium_dialogs: 0,
+        long_dialogs: 0,
+      };
+    }
+
+    if (viewMode === "month") {
+      // For month view, use the latest metric
+      return metrics[metrics.length - 1];
+    }
+
+    // For half_year and year views, aggregate the data
+    const sum = metrics.reduce((acc, m) => ({
+      conversion: acc.conversion + m.conversion,
+      autonomy: acc.autonomy + m.autonomy,
+      time_saved_hours: acc.time_saved_hours + (m.time_saved_hours || 0),
+      confirmed_appointments: acc.confirmed_appointments + (m.confirmed_appointments || 0),
+      satisfaction: acc.satisfaction + m.satisfaction,
+      business_hours_appointments: acc.business_hours_appointments + (m.business_hours_appointments || 0),
+      non_business_hours_appointments: acc.non_business_hours_appointments + (m.non_business_hours_appointments || 0),
+      short_dialogs: acc.short_dialogs + (m.short_dialogs || 0),
+      medium_dialogs: acc.medium_dialogs + (m.medium_dialogs || 0),
+      long_dialogs: acc.long_dialogs + (m.long_dialogs || 0),
+    }), {
+      conversion: 0,
+      autonomy: 0,
+      time_saved_hours: 0,
+      confirmed_appointments: 0,
+      satisfaction: 0,
+      business_hours_appointments: 0,
+      non_business_hours_appointments: 0,
+      short_dialogs: 0,
+      medium_dialogs: 0,
+      long_dialogs: 0,
+    });
+
+    // Calculate averages for percentage metrics, sum for count metrics
+    return {
+      conversion: sum.conversion / metrics.length,
+      autonomy: sum.autonomy / metrics.length,
+      time_saved_hours: sum.time_saved_hours,
+      confirmed_appointments: sum.confirmed_appointments,
+      satisfaction: sum.satisfaction / metrics.length,
+      business_hours_appointments: sum.business_hours_appointments,
+      non_business_hours_appointments: sum.non_business_hours_appointments,
+      short_dialogs: sum.short_dialogs,
+      medium_dialogs: sum.medium_dialogs,
+      long_dialogs: sum.long_dialogs,
+    };
+  })();
 
   // Set first client as selected when clients load
   if (clients.length > 0 && !selectedClientId) {
@@ -587,25 +636,25 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <KpiCard
                 title="Конверсия в запись"
-                value={`${(latestMetric.conversion * 100).toFixed(1)}%`}
+                value={`${(aggregatedMetric.conversion * 100).toFixed(1)}%`}
                 icon={MessageSquare}
                 gradient="purple"
               />
               <KpiCard
                 title="Автономность"
-                value={`${(latestMetric.autonomy * 100).toFixed(1)}%`}
+                value={`${(aggregatedMetric.autonomy * 100).toFixed(1)}%`}
                 icon={TrendingUp}
                 gradient="cyan"
               />
               <KpiCard
                 title="Экономия времени"
-                value={`${latestMetric.time_saved_hours || 0} ч`}
+                value={`${aggregatedMetric.time_saved_hours || 0} ч`}
                 icon={Clock}
                 gradient="salmon"
               />
               <KpiCard
                 title="Подтвержденные записи"
-                value={latestMetric.confirmed_appointments || 0}
+                value={aggregatedMetric.confirmed_appointments || 0}
                 icon={CheckCircle2}
                 gradient="green"
               />
@@ -642,31 +691,31 @@ export default function AdminDashboard() {
               )}
               <GaugeChartCard
                 title="Удовлетворенность клиента"
-                value={latestMetric.satisfaction}
+                value={aggregatedMetric.satisfaction}
                 icon={<Smile className="h-4 w-4 text-muted-foreground" />}
               />
               <DoughnutChartCard
                 title="Подтвержденные записи"
                 data={[
-                  { name: "Подтверждено", value: latestMetric.confirmed_appointments || 0 },
-                  { name: "Всего диалогов", value: (latestMetric.short_dialogs || 0) + (latestMetric.medium_dialogs || 0) + (latestMetric.long_dialogs || 0) - (latestMetric.confirmed_appointments || 0) },
+                  { name: "Подтверждено", value: aggregatedMetric.confirmed_appointments || 0 },
+                  { name: "Всего диалогов", value: (aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0) - (aggregatedMetric.confirmed_appointments || 0) },
                 ]}
                 colors={["hsl(142 71% 45%)", "hsl(280 70% 60%)"]}
               />
               <DoughnutChartCard
                 title="Записи по времени"
                 data={[
-                  { name: "Рабочее время", value: latestMetric.business_hours_appointments },
-                  { name: "Нерабочее время", value: latestMetric.non_business_hours_appointments },
+                  { name: "Рабочее время", value: aggregatedMetric.business_hours_appointments },
+                  { name: "Нерабочее время", value: aggregatedMetric.non_business_hours_appointments },
                 ]}
                 colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)"]}
               />
               <DoughnutChartCard
                 title="Длительность диалогов"
                 data={[
-                  { name: "Короткие", value: latestMetric.short_dialogs },
-                  { name: "Средние", value: latestMetric.medium_dialogs },
-                  { name: "Длинные", value: latestMetric.long_dialogs },
+                  { name: "Короткие", value: aggregatedMetric.short_dialogs },
+                  { name: "Средние", value: aggregatedMetric.medium_dialogs },
+                  { name: "Длинные", value: aggregatedMetric.long_dialogs },
                 ]}
                 colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)", "hsl(0 70% 60%)"]}
               />

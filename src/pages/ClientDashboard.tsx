@@ -42,12 +42,43 @@ export default function ClientDashboard() {
 
   const periods = generatePeriods();
   
-  const latestMetric = metrics[metrics.length - 1] || {
-    conversion: 0,
-    autonomy: 0,
-    time_saved_hours: 0,
-    confirmed_appointments: 0,
-  };
+  // Aggregate metrics based on view mode
+  const aggregatedMetric = (() => {
+    if (metrics.length === 0) {
+      return {
+        conversion: 0,
+        autonomy: 0,
+        time_saved_hours: 0,
+        confirmed_appointments: 0,
+      };
+    }
+
+    if (viewMode === "month") {
+      // For month view, use the latest metric
+      return metrics[metrics.length - 1];
+    }
+
+    // For half_year and year views, aggregate the data
+    const sum = metrics.reduce((acc, m) => ({
+      conversion: acc.conversion + m.conversion,
+      autonomy: acc.autonomy + m.autonomy,
+      time_saved_hours: acc.time_saved_hours + (m.time_saved_hours || 0),
+      confirmed_appointments: acc.confirmed_appointments + (m.confirmed_appointments || 0),
+    }), {
+      conversion: 0,
+      autonomy: 0,
+      time_saved_hours: 0,
+      confirmed_appointments: 0,
+    });
+
+    // Calculate averages for percentage metrics, sum for count metrics
+    return {
+      conversion: sum.conversion / metrics.length,
+      autonomy: sum.autonomy / metrics.length,
+      time_saved_hours: sum.time_saved_hours,
+      confirmed_appointments: sum.confirmed_appointments,
+    };
+  })();
 
   if (clientLoading) {
     return (
@@ -170,25 +201,25 @@ export default function ClientDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <KpiCard
               title="Конверсия в запись"
-              value={`${(latestMetric.conversion * 100).toFixed(1)}%`}
+              value={`${(aggregatedMetric.conversion * 100).toFixed(1)}%`}
               icon={MessageSquare}
               gradient="purple"
             />
             <KpiCard
               title="Автономность"
-              value={`${(latestMetric.autonomy * 100).toFixed(1)}%`}
+              value={`${(aggregatedMetric.autonomy * 100).toFixed(1)}%`}
               icon={TrendingUp}
               gradient="cyan"
             />
             <KpiCard
               title="Экономия времени"
-              value={`${latestMetric.time_saved_hours || 0} ч`}
+              value={`${aggregatedMetric.time_saved_hours || 0} ч`}
               icon={Clock}
               gradient="salmon"
             />
             <KpiCard
               title="Подтвержденные записи"
-              value={latestMetric.confirmed_appointments || 0}
+              value={aggregatedMetric.confirmed_appointments || 0}
               icon={CheckCircle2}
               gradient="green"
             />
@@ -222,8 +253,8 @@ export default function ClientDashboard() {
             <DoughnutChartCard
               title="Подтвержденные записи"
               data={[
-                { name: "Подтверждено", value: latestMetric.confirmed_appointments || 0 },
-                { name: "Всего диалогов", value: Math.max(0, 100 - (latestMetric.confirmed_appointments || 0)) },
+                { name: "Подтверждено", value: aggregatedMetric.confirmed_appointments || 0 },
+                { name: "Всего диалогов", value: Math.max(0, 100 - (aggregatedMetric.confirmed_appointments || 0)) },
               ]}
               colors={["hsl(142 71% 45%)", "hsl(280 70% 60%)"]}
             />

@@ -19,10 +19,10 @@ export default function GaugeChartCard({ title, value, icon }: GaugeChartCardPro
 
   // Color based on satisfaction level
   const getColor = (percent: number) => {
-    if (percent >= 80) return 'hsl(var(--chart-1))'; // Green
-    if (percent >= 60) return 'hsl(var(--chart-3))'; // Yellow
-    if (percent >= 40) return 'hsl(var(--chart-4))'; // Orange
-    return 'hsl(var(--chart-5))'; // Red
+    if (percent >= 76) return 'hsl(142 71% 45%)'; // Green (76-100%)
+    if (percent >= 51) return 'hsl(45 93% 47%)'; // Yellow (51-75%)
+    if (percent >= 26) return 'hsl(25 95% 53%)'; // Orange (26-50%)
+    return 'hsl(0 72% 51%)'; // Red (0-25%)
   };
 
   const color = getColor(percentage);
