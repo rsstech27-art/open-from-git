@@ -4,9 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -14,6 +23,9 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const { user, signIn, signUp } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
@@ -68,6 +80,29 @@ export default function Login() {
       toast.error("Произошла ошибка. Попробуйте снова.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Письмо для сброса пароля отправлено на ваш email");
+        setIsResetDialogOpen(false);
+        setResetEmail("");
+      }
+    } catch (error) {
+      toast.error("Произошла ошибка. Попробуйте снова.");
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -128,7 +163,7 @@ export default function Login() {
           </Button>
         </form>
 
-        <div className="text-center">
+        <div className="text-center space-y-2">
           <button
             type="button"
             onClick={() => setIsRegister(!isRegister)}
@@ -136,6 +171,43 @@ export default function Login() {
           >
             {isRegister ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться"}
           </button>
+
+          {!isRegister && (
+            <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+              <DialogTrigger asChild>
+                <button
+                  type="button"
+                  className="block w-full text-sm text-muted-foreground hover:text-primary hover:underline"
+                >
+                  Забыли пароль?
+                </button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Восстановление пароля</DialogTitle>
+                  <DialogDescription>
+                    Введите ваш email, и мы отправим вам ссылку для сброса пароля.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handlePasswordReset} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="resetEmail">Email</Label>
+                    <Input
+                      id="resetEmail"
+                      type="email"
+                      required
+                      placeholder="your@email.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={resetLoading}>
+                    {resetLoading ? "Отправка..." : "Отправить ссылку"}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </Card>
     </div>
