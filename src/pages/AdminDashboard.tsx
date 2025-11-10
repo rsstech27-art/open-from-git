@@ -133,7 +133,7 @@ export default function AdminDashboard() {
     
     await updateClient.mutateAsync({
       id: selectedClientId,
-      updates: { manager_name: managerName },
+      updates: { manager_name: managerName === "unassigned" ? null : managerName },
     });
   };
 
@@ -267,14 +267,14 @@ export default function AdminDashboard() {
                   <div className="flex-1">
                     <Label className="text-sm text-foreground/70 mb-2 block">Закрепленный менеджер</Label>
                     <Select 
-                      value={selectedClient?.manager_name || ""} 
+                      value={selectedClient?.manager_name || "unassigned"} 
                       onValueChange={handleManagerChange}
                     >
                       <SelectTrigger className="bg-background border text-foreground rounded-lg h-12">
                         <SelectValue placeholder="Выберите менеджера" />
                       </SelectTrigger>
                       <SelectContent className="bg-popover border shadow-lg z-[100]">
-                        <SelectItem value="">Не назначен</SelectItem>
+                        <SelectItem value="unassigned">Не назначен</SelectItem>
                         {managers.map((manager) => (
                           <SelectItem key={manager.id} value={manager.name} className="cursor-pointer">
                             {manager.name}
