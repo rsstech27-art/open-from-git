@@ -576,11 +576,32 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <KpiCard
+                title="Конверсия в запись"
+                value={`${(latestMetric.conversion * 100).toFixed(1)}%`}
+                icon={MessageSquare}
+                gradient="purple"
+              />
+              <KpiCard
+                title="Автономность"
+                value={`${(latestMetric.autonomy * 100).toFixed(1)}%`}
+                icon={TrendingUp}
+                gradient="cyan"
+              />
+              <KpiCard
+                title="Экономия"
+                value={`${latestMetric.financial_equiv.toLocaleString()} ₽`}
+                icon={RussianRuble}
+                gradient="salmon"
+              />
+              <KpiCard
                 title="Повторные клиенты"
                 value={`${(latestMetric.retention_share * 100).toFixed(1)}%`}
                 icon={Users}
                 gradient="green"
               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <KpiCard
                 title="Средняя скорость ответа"
                 value={`${latestMetric.avg_response_speed_seconds} сек`}
