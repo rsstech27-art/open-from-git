@@ -8,8 +8,8 @@ export interface Metric {
   date: string;
   conversion: number;
   autonomy: number;
-  financial_equiv: number;
-  retention_share: number;
+  time_saved_hours: number;
+  confirmed_appointments: number;
   satisfaction: number;
   business_hours_appointments: number;
   non_business_hours_appointments: number;

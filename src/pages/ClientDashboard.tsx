@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, TrendingUp, DollarSign, Users, LogOut } from "lucide-react";
+import { MessageSquare, TrendingUp, Users, LogOut, Clock, CheckCircle2 } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
@@ -45,8 +45,8 @@ export default function ClientDashboard() {
   const latestMetric = metrics[metrics.length - 1] || {
     conversion: 0,
     autonomy: 0,
-    financial_equiv: 0,
-    retention_share: 0,
+    time_saved_hours: 0,
+    confirmed_appointments: 0,
   };
 
   if (clientLoading) {
@@ -181,15 +181,15 @@ export default function ClientDashboard() {
               gradient="cyan"
             />
             <KpiCard
-              title="Экономия"
-              value={`${latestMetric.financial_equiv.toLocaleString()} ₽`}
-              icon={DollarSign}
+              title="Экономия времени"
+              value={`${latestMetric.time_saved_hours || 0} ч`}
+              icon={Clock}
               gradient="salmon"
             />
             <KpiCard
-              title="Повторные клиенты"
-              value={`${(latestMetric.retention_share * 100).toFixed(1)}%`}
-              icon={Users}
+              title="Подтвержденные записи"
+              value={latestMetric.confirmed_appointments || 0}
+              icon={CheckCircle2}
               gradient="green"
             />
           </div>
@@ -212,20 +212,20 @@ export default function ClientDashboard() {
               color="hsl(280 70% 60%)"
             />
             <BarChartCard
-              title="Финансовый эквивалент экономии"
+              title="Экономия времени (часы)"
               data={metrics.map((m) => ({ 
                 name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                value: m.financial_equiv 
+                value: m.time_saved_hours || 0
               }))}
               color="hsl(189 94% 43%)"
             />
             <DoughnutChartCard
-              title="Новые / Повторные клиенты"
+              title="Подтвержденные записи"
               data={[
-                { name: "Повторные", value: Number((latestMetric.retention_share * 100).toFixed(1)) },
-                { name: "Новые", value: Number(((1 - latestMetric.retention_share) * 100).toFixed(1)) },
+                { name: "Подтверждено", value: latestMetric.confirmed_appointments || 0 },
+                { name: "Всего диалогов", value: Math.max(0, 100 - (latestMetric.confirmed_appointments || 0)) },
               ]}
-              colors={["hsl(280 70% 60%)", "hsl(189 94% 43%)"]}
+              colors={["hsl(142 71% 45%)", "hsl(280 70% 60%)"]}
             />
           </div>
         </div>

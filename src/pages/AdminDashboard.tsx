@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut, Plus, CheckCircle2, AlertCircle, Smile } from "lucide-react";
+import { ArrowLeft, MessageSquare, TrendingUp, Users, LogOut, Plus, CheckCircle2, AlertCircle, Smile, Clock } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
@@ -59,8 +59,8 @@ export default function AdminDashboard() {
   const [previewMetrics, setPreviewMetrics] = useState<{
     conversion: number;
     autonomy: number;
-    financial_equiv: number;
-    retention_share: number;
+    time_saved_hours: number;
+    confirmed_appointments: number;
     satisfaction: number;
     business_hours_appointments: number;
     non_business_hours_appointments: number;
@@ -102,8 +102,8 @@ export default function AdminDashboard() {
   const latestMetric = metrics[metrics.length - 1] || {
     conversion: 0,
     autonomy: 0,
-    financial_equiv: 0,
-    retention_share: 0,
+    time_saved_hours: 0,
+    confirmed_appointments: 0,
     satisfaction: 0,
     business_hours_appointments: 0,
     non_business_hours_appointments: 0,
@@ -121,8 +121,8 @@ export default function AdminDashboard() {
   const parseMetricsData = (data: string) => {
     const conversionMatch = data.match(/конверси[яи][\s:]+(\d+[.,]?\d*)/i);
     const autonomyMatch = data.match(/автономност[ьи][\s:]+(\d+[.,]?\d*)/i);
-    const financialMatch = data.match(/эконом[иія]+[\s:]+(\d+[.,]?\d*)/i);
-    const retentionMatch = data.match(/повторн[ыхе]+[\s:]+(\d+[.,]?\d*)/i);
+    const timeSavedMatch = data.match(/эконом[иія]+[\s:]+(\d+)/i);
+    const confirmedAppointmentsMatch = data.match(/подтвержд[ыхе]+[\s:]+(\d+)/i);
     const satisfactionMatch = data.match(/удовлетворенност[ьи][\s:]+(\d+[.,]?\d*)/i);
     const businessHoursMatch = data.match(/рабоч[иеа]+\s+врем[яи]+[\s:]+(\d+)/i);
     const nonBusinessHoursMatch = data.match(/нерабоч[иеа]+\s+врем[яи]+[\s:]+(\d+)/i);
@@ -133,8 +133,8 @@ export default function AdminDashboard() {
     return {
       conversion: conversionMatch ? parseFloat(conversionMatch[1].replace(',', '.')) / 100 : 0,
       autonomy: autonomyMatch ? parseFloat(autonomyMatch[1].replace(',', '.')) / 100 : 0,
-      financial_equiv: financialMatch ? parseInt(financialMatch[1].replace(/[.,]/g, '')) : 0,
-      retention_share: retentionMatch ? parseFloat(retentionMatch[1].replace(',', '.')) / 100 : 0,
+      time_saved_hours: timeSavedMatch ? parseInt(timeSavedMatch[1]) : 0,
+      confirmed_appointments: confirmedAppointmentsMatch ? parseInt(confirmedAppointmentsMatch[1]) : 0,
       satisfaction: satisfactionMatch ? parseFloat(satisfactionMatch[1].replace(',', '.')) / 100 : 0,
       business_hours_appointments: businessHoursMatch ? parseInt(businessHoursMatch[1]) : 0,
       non_business_hours_appointments: nonBusinessHoursMatch ? parseInt(nonBusinessHoursMatch[1]) : 0,
@@ -179,8 +179,8 @@ export default function AdminDashboard() {
         period_type: reportPeriod,
         conversion: previewMetrics.conversion,
         autonomy: previewMetrics.autonomy,
-        financial_equiv: previewMetrics.financial_equiv,
-        retention_share: previewMetrics.retention_share,
+        time_saved_hours: previewMetrics.time_saved_hours,
+        confirmed_appointments: previewMetrics.confirmed_appointments,
         satisfaction: previewMetrics.satisfaction,
         business_hours_appointments: previewMetrics.business_hours_appointments,
         non_business_hours_appointments: previewMetrics.non_business_hours_appointments,
@@ -598,15 +598,15 @@ export default function AdminDashboard() {
                 gradient="cyan"
               />
               <KpiCard
-                title="Экономия"
-                value={`${latestMetric.financial_equiv.toLocaleString()} ₽`}
-                icon={RussianRuble}
+                title="Экономия времени"
+                value={`${latestMetric.time_saved_hours || 0} ч`}
+                icon={Clock}
                 gradient="salmon"
               />
               <KpiCard
-                title="Повторные клиенты"
-                value={`${(latestMetric.retention_share * 100).toFixed(1)}%`}
-                icon={Users}
+                title="Подтвержденные записи"
+                value={latestMetric.confirmed_appointments || 0}
+                icon={CheckCircle2}
                 gradient="green"
               />
             </div>
@@ -631,10 +631,10 @@ export default function AdminDashboard() {
                     color="hsl(280 70% 60%)"
                   />
                   <BarChartCard
-                    title="Финансовый эквивалент экономии"
+                    title="Экономия времени (часы)"
                     data={metrics.map((m) => ({ 
                       name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                      value: m.financial_equiv 
+                      value: m.time_saved_hours || 0
                     }))}
                     color="hsl(189 94% 43%)"
                   />
@@ -646,12 +646,12 @@ export default function AdminDashboard() {
                 icon={<Smile className="h-4 w-4 text-muted-foreground" />}
               />
               <DoughnutChartCard
-                title="Новые / Повторные клиенты"
+                title="Подтвержденные записи"
                 data={[
-                  { name: "Повторные", value: Number((latestMetric.retention_share * 100).toFixed(1)) },
-                  { name: "Новые", value: Number(((1 - latestMetric.retention_share) * 100).toFixed(1)) },
+                  { name: "Подтверждено", value: latestMetric.confirmed_appointments || 0 },
+                  { name: "Всего диалогов", value: (latestMetric.short_dialogs || 0) + (latestMetric.medium_dialogs || 0) + (latestMetric.long_dialogs || 0) - (latestMetric.confirmed_appointments || 0) },
                 ]}
-                colors={["hsl(280 70% 60%)", "hsl(189 94% 43%)"]}
+                colors={["hsl(142 71% 45%)", "hsl(280 70% 60%)"]}
               />
               <DoughnutChartCard
                 title="Записи по времени"
@@ -765,31 +765,31 @@ export default function AdminDashboard() {
                 <Card className="p-4 bg-muted">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <RussianRuble className="w-5 h-5 text-red-500" />
-                      <span className="font-medium">Экономия</span>
+                      <Clock className="w-5 h-5 text-red-500" />
+                      <span className="font-medium">Экономия времени</span>
                     </div>
-                    {previewMetrics.financial_equiv > 0 ? (
+                    {(previewMetrics.time_saved_hours || 0) > 0 ? (
                       <CheckCircle2 className="w-5 h-5 text-green-500" />
                     ) : (
                       <AlertCircle className="w-5 h-5 text-yellow-500" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{previewMetrics.financial_equiv.toLocaleString()} ₽</p>
+                  <p className="text-2xl font-light">{previewMetrics.time_saved_hours || 0} ч</p>
                 </Card>
 
                 <Card className="p-4 bg-muted">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Users className="w-5 h-5 text-green-500" />
-                      <span className="font-medium">Повторные клиенты</span>
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <span className="font-medium">Подтвержденные записи</span>
                     </div>
-                    {previewMetrics.retention_share > 0 ? (
+                    {(previewMetrics.confirmed_appointments || 0) > 0 ? (
                       <CheckCircle2 className="w-5 h-5 text-green-500" />
                     ) : (
                       <AlertCircle className="w-5 h-5 text-yellow-500" />
                     )}
                   </div>
-                  <p className="text-2xl font-light">{(previewMetrics.retention_share * 100).toFixed(1)}%</p>
+                  <p className="text-2xl font-light">{previewMetrics.confirmed_appointments || 0}</p>
                 </Card>
 
                 <Card className="p-4 bg-muted">
@@ -883,7 +883,7 @@ export default function AdminDashboard() {
                 </Card>
 
                 {(previewMetrics.conversion === 0 || previewMetrics.autonomy === 0 || 
-                  previewMetrics.financial_equiv === 0 || previewMetrics.retention_share === 0 ||
+                  previewMetrics.time_saved_hours === 0 || previewMetrics.confirmed_appointments === 0 ||
                   previewMetrics.satisfaction === 0 || previewMetrics.business_hours_appointments === 0 ||
                   previewMetrics.non_business_hours_appointments === 0 || previewMetrics.short_dialogs === 0 ||
                   previewMetrics.medium_dialogs === 0 || previewMetrics.long_dialogs === 0) && (
