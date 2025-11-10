@@ -28,31 +28,18 @@ export default function Login() {
   const { user, role, loading: authLoading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect authenticated users to their dashboard
   useEffect(() => {
-    // Only redirect if auth is fully loaded and we have both user and role
     if (!authLoading && user && role) {
-      const path = role === "admin" ? "/admin" : "/client";
-      navigate(path, { replace: true });
+      navigate(role === "admin" ? "/admin" : "/client", { replace: true });
     }
   }, [authLoading, user, role, navigate]);
 
-  // Show loading screen while checking auth
   if (authLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Загрузка...</div>
-      </div>
-    );
+    return null;
   }
 
-  // Don't render login form if already authenticated
   if (user && role) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Перенаправление...</div>
-      </div>
-    );
+    return null;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

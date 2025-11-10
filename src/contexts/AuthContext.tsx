@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 export type UserRole = "admin" | "client";
 
@@ -12,7 +11,7 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signOut: () => Promise<{ error: any }>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,82 +21,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
-  // Fetch user role from database
-  const fetchUserRole = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
+  useEffect(() => {
+    let isMounted = true;
+
+    // Fetch role helper
+    const fetchRole = async (userId: string): Promise<UserRole | null> => {
+      const { data } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", userId)
         .maybeSingle();
+      
+      return (data?.role as UserRole) || null;
+    };
 
-      if (error) {
-        console.error("Error fetching role:", error);
-        return null;
+    // Initialize session
+    const initSession = async () => {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
+      if (!isMounted) return;
+
+      if (currentSession?.user) {
+        const userRole = await fetchRole(currentSession.user.id);
+        if (isMounted) {
+          setSession(currentSession);
+          setUser(currentSession.user);
+          setRole(userRole);
+        }
       }
-
-      return data?.role as UserRole | null;
-    } catch (error) {
-      console.error("Error in fetchUserRole:", error);
-      return null;
-    }
-  };
-
-  // Initialize auth state
-  useEffect(() => {
-    let mounted = true;
-
-    const initAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!mounted) return;
-
-        if (session?.user) {
-          const userRole = await fetchUserRole(session.user.id);
-          if (mounted) {
-            setSession(session);
-            setUser(session.user);
-            setRole(userRole);
-          }
-        }
-      } catch (error) {
-        console.error("Error initializing auth:", error);
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+      
+      if (isMounted) {
+        setLoading(false);
       }
     };
 
-    initAuth();
+    // Listen to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        if (!isMounted) return;
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
-
-      if (session?.user) {
-        const userRole = await fetchUserRole(session.user.id);
-        if (mounted) {
-          setSession(session);
-          setUser(session.user);
-          setRole(userRole);
-          setLoading(false);
+        if (newSession?.user) {
+          const userRole = await fetchRole(newSession.user.id);
+          if (isMounted) {
+            setSession(newSession);
+            setUser(newSession.user);
+            setRole(userRole);
+          }
+        } else {
+          if (isMounted) {
+            setSession(null);
+            setUser(null);
+            setRole(null);
+          }
         }
-      } else {
-        if (mounted) {
-          setSession(null);
-          setUser(null);
-          setRole(null);
+        
+        if (isMounted) {
           setLoading(false);
         }
       }
-    });
+    );
+
+    initSession();
 
     return () => {
-      mounted = false;
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -129,14 +117,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (!error) {
-      setUser(null);
-      setSession(null);
-      setRole(null);
-      navigate("/");
-    }
-    return { error };
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+    setRole(null);
   };
 
   return (

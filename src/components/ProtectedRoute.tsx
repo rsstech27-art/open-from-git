@@ -11,11 +11,7 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
   const { user, role, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Загрузка...</div>
-      </div>
-    );
+    return null;
   }
 
   if (!user || !role) {
