@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -164,15 +164,18 @@ export default function AdminDashboard() {
     };
   })();
 
-  // Set first client as selected when clients load and update AI status
+  // Set first client as selected when clients load
   if (clients.length > 0 && !selectedClientId) {
     setSelectedClientId(clients[0].id);
+    setAiStatus(clients[0].ai_status || "active");
   }
-  
+
   // Update AI status when selected client changes
-  if (selectedClient && aiStatus !== selectedClient.ai_status) {
-    setAiStatus(selectedClient.ai_status || "active");
-  }
+  useEffect(() => {
+    if (selectedClient) {
+      setAiStatus(selectedClient.ai_status || "active");
+    }
+  }, [selectedClient?.id, selectedClient?.ai_status]);
 
 
   const parseMetricsData = (data: string) => {

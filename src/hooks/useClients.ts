@@ -85,8 +85,11 @@ export function useUpdateClient() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Invalidate both queries to ensure data is refreshed
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["client", data.id] });
+      queryClient.invalidateQueries({ queryKey: ["client-by-user", data.user_id] });
       toast.success("Данные клиента обновлены");
     },
     onError: (error) => {
@@ -191,8 +194,10 @@ export function useUpdateClientEmail() {
 
       if (clientError) throw clientError;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Invalidate all related queries to ensure data is refreshed
       queryClient.invalidateQueries({ queryKey: ["clients"] });
+      queryClient.invalidateQueries({ queryKey: ["client", variables.clientId] });
       toast.success("Email клиента успешно изменен");
     },
     onError: (error) => {
