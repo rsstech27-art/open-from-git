@@ -83,36 +83,45 @@ export type Database = {
       metrics: {
         Row: {
           autonomy: number
+          avg_response_speed_seconds: number | null
+          business_hours_appointments: number | null
           client_id: string
           conversion: number
           created_at: string
           date: string
           financial_equiv: number
           id: string
+          non_business_hours_appointments: number | null
           period_type: string | null
           retention_share: number
           satisfaction: number | null
         }
         Insert: {
           autonomy?: number
+          avg_response_speed_seconds?: number | null
+          business_hours_appointments?: number | null
           client_id: string
           conversion?: number
           created_at?: string
           date: string
           financial_equiv?: number
           id?: string
+          non_business_hours_appointments?: number | null
           period_type?: string | null
           retention_share?: number
           satisfaction?: number | null
         }
         Update: {
           autonomy?: number
+          avg_response_speed_seconds?: number | null
+          business_hours_appointments?: number | null
           client_id?: string
           conversion?: number
           created_at?: string
           date?: string
           financial_equiv?: number
           id?: string
+          non_business_hours_appointments?: number | null
           period_type?: string | null
           retention_share?: number
           satisfaction?: number | null

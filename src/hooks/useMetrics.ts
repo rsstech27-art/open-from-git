@@ -11,6 +11,9 @@ export interface Metric {
   financial_equiv: number;
   retention_share: number;
   satisfaction: number;
+  business_hours_appointments: number;
+  non_business_hours_appointments: number;
+  avg_response_speed_seconds: number;
   period_type: string | null;
   created_at: string;
 }

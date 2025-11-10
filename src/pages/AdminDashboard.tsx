@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut, Plus, CheckCircle2, AlertCircle, Smile } from "lucide-react";
+import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut, Plus, CheckCircle2, AlertCircle, Smile, Clock } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
@@ -62,6 +62,9 @@ export default function AdminDashboard() {
     financial_equiv: number;
     retention_share: number;
     satisfaction: number;
+    business_hours_appointments: number;
+    non_business_hours_appointments: number;
+    avg_response_speed_seconds: number;
   } | null>(null);
 
   const { data: clients = [], isLoading: clientsLoading } = useClients();
@@ -100,6 +103,9 @@ export default function AdminDashboard() {
     financial_equiv: 0,
     retention_share: 0,
     satisfaction: 0,
+    business_hours_appointments: 0,
+    non_business_hours_appointments: 0,
+    avg_response_speed_seconds: 0,
   };
 
   // Set first client as selected when clients load
@@ -114,6 +120,9 @@ export default function AdminDashboard() {
     const financialMatch = data.match(/эконом[иія]+[\s:]+(\d+[.,]?\d*)/i);
     const retentionMatch = data.match(/повторн[ыхе]+[\s:]+(\d+[.,]?\d*)/i);
     const satisfactionMatch = data.match(/удовлетворенност[ьи][\s:]+(\d+[.,]?\d*)/i);
+    const businessHoursMatch = data.match(/рабоч[иеа]+\s+врем[яи]+[\s:]+(\d+)/i);
+    const nonBusinessHoursMatch = data.match(/нерабоч[иеа]+\s+врем[яи]+[\s:]+(\d+)/i);
+    const responseSpeedMatch = data.match(/скорост[ьи]\s+ответ[аов]+[\s:]+(\d+)/i);
 
     return {
       conversion: conversionMatch ? parseFloat(conversionMatch[1].replace(',', '.')) / 100 : 0,
@@ -121,6 +130,9 @@ export default function AdminDashboard() {
       financial_equiv: financialMatch ? parseInt(financialMatch[1].replace(/[.,]/g, '')) : 0,
       retention_share: retentionMatch ? parseFloat(retentionMatch[1].replace(',', '.')) / 100 : 0,
       satisfaction: satisfactionMatch ? parseFloat(satisfactionMatch[1].replace(',', '.')) / 100 : 0,
+      business_hours_appointments: businessHoursMatch ? parseInt(businessHoursMatch[1]) : 0,
+      non_business_hours_appointments: nonBusinessHoursMatch ? parseInt(nonBusinessHoursMatch[1]) : 0,
+      avg_response_speed_seconds: responseSpeedMatch ? parseInt(responseSpeedMatch[1]) : 0,
     };
   };
 
@@ -162,6 +174,9 @@ export default function AdminDashboard() {
         financial_equiv: previewMetrics.financial_equiv,
         retention_share: previewMetrics.retention_share,
         satisfaction: previewMetrics.satisfaction,
+        business_hours_appointments: previewMetrics.business_hours_appointments,
+        non_business_hours_appointments: previewMetrics.non_business_hours_appointments,
+        avg_response_speed_seconds: previewMetrics.avg_response_speed_seconds,
       });
 
       setClientData("");
@@ -561,56 +576,48 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <KpiCard
-                title="Конверсия в запись"
-                value={`${(latestMetric.conversion * 100).toFixed(1)}%`}
-                icon={MessageSquare}
-                gradient="purple"
-              />
-              <KpiCard
-                title="Автономность"
-                value={`${(latestMetric.autonomy * 100).toFixed(1)}%`}
-                icon={TrendingUp}
-                gradient="cyan"
-              />
-              <KpiCard
-                title="Экономия"
-                value={`${latestMetric.financial_equiv.toLocaleString()} ₽`}
-                icon={RussianRuble}
-                gradient="salmon"
-              />
-              <KpiCard
                 title="Повторные клиенты"
                 value={`${(latestMetric.retention_share * 100).toFixed(1)}%`}
                 icon={Users}
                 gradient="green"
               />
+              <KpiCard
+                title="Средняя скорость ответа"
+                value={`${latestMetric.avg_response_speed_seconds} сек`}
+                icon={Clock}
+                gradient="cyan"
+              />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <LineChartCard
-                title="Конверсия в запись"
-                data={metrics.map((m) => ({ 
-                  name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                  value: Number((m.conversion * 100).toFixed(1)) 
-                }))}
-                color="hsl(189 94% 43%)"
-              />
-              <LineChartCard
-                title="Автономность (без админа)"
-                data={metrics.map((m) => ({ 
-                  name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                  value: Number((m.autonomy * 100).toFixed(1)) 
-                }))}
-                color="hsl(280 70% 60%)"
-              />
-              <BarChartCard
-                title="Финансовый эквивалент экономии"
-                data={metrics.map((m) => ({ 
-                  name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
-                  value: m.financial_equiv 
-                }))}
-                color="hsl(189 94% 43%)"
-              />
+              {viewMode !== "month" && (
+                <>
+                  <LineChartCard
+                    title="Конверсия в запись"
+                    data={metrics.map((m) => ({ 
+                      name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
+                      value: Number((m.conversion * 100).toFixed(1)) 
+                    }))}
+                    color="hsl(189 94% 43%)"
+                  />
+                  <LineChartCard
+                    title="Автономность (без админа)"
+                    data={metrics.map((m) => ({ 
+                      name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
+                      value: Number((m.autonomy * 100).toFixed(1)) 
+                    }))}
+                    color="hsl(280 70% 60%)"
+                  />
+                  <BarChartCard
+                    title="Финансовый эквивалент экономии"
+                    data={metrics.map((m) => ({ 
+                      name: new Date(m.date).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' }), 
+                      value: m.financial_equiv 
+                    }))}
+                    color="hsl(189 94% 43%)"
+                  />
+                </>
+              )}
               <GaugeChartCard
                 title="Удовлетворенность клиента"
                 value={latestMetric.satisfaction}
@@ -623,6 +630,14 @@ export default function AdminDashboard() {
                   { name: "Новые", value: Number(((1 - latestMetric.retention_share) * 100).toFixed(1)) },
                 ]}
                 colors={["hsl(280 70% 60%)", "hsl(189 94% 43%)"]}
+              />
+              <DoughnutChartCard
+                title="Записи по времени"
+                data={[
+                  { name: "Рабочее время", value: latestMetric.business_hours_appointments },
+                  { name: "Нерабочее время", value: latestMetric.non_business_hours_appointments },
+                ]}
+                colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)"]}
               />
             </div>
           </div>
@@ -651,11 +666,11 @@ export default function AdminDashboard() {
             
             <div>
               <Label htmlFor="clientData">Данные клиента</Label>
-              <Textarea
+                <Textarea
                 id="clientData"
                 className="bg-muted border text-foreground mt-2 rounded-lg"
                 rows={8}
-                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 50000, повторные 45%)"
+                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 50000, повторные 45%, удовлетворенность 90%, рабочее время 120, нерабочее время 30, скорость ответа 15)"
                 value={clientData}
                 onChange={(e) => setClientData(e.target.value)}
                 maxLength={5000}
@@ -761,15 +776,61 @@ export default function AdminDashboard() {
                   <p className="text-2xl font-light">{(previewMetrics.satisfaction * 100).toFixed(1)}%</p>
                 </Card>
 
+                <Card className="p-4 bg-muted">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-cyan-500" />
+                      <span className="font-medium">Записи в рабочее время</span>
+                    </div>
+                    {previewMetrics.business_hours_appointments > 0 ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-2xl font-light">{previewMetrics.business_hours_appointments}</p>
+                </Card>
+
+                <Card className="p-4 bg-muted">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-purple-500" />
+                      <span className="font-medium">Записи в нерабочее время</span>
+                    </div>
+                    {previewMetrics.non_business_hours_appointments > 0 ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-2xl font-light">{previewMetrics.non_business_hours_appointments}</p>
+                </Card>
+
+                <Card className="p-4 bg-muted">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-green-500" />
+                      <span className="font-medium">Средняя скорость ответа</span>
+                    </div>
+                    {previewMetrics.avg_response_speed_seconds > 0 ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-2xl font-light">{previewMetrics.avg_response_speed_seconds} сек</p>
+                </Card>
+
                 {(previewMetrics.conversion === 0 || previewMetrics.autonomy === 0 || 
                   previewMetrics.financial_equiv === 0 || previewMetrics.retention_share === 0 ||
-                  previewMetrics.satisfaction === 0) && (
+                  previewMetrics.satisfaction === 0 || previewMetrics.business_hours_appointments === 0 ||
+                  previewMetrics.non_business_hours_appointments === 0 || previewMetrics.avg_response_speed_seconds === 0) && (
                   <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                     <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
                     <div className="text-sm">
                       <p className="font-medium text-yellow-700 dark:text-yellow-400">Некоторые метрики не распознаны</p>
                       <p className="text-muted-foreground mt-1">
-                        Убедитесь, что данные содержат ключевые слова: конверсия, автономность, экономия, повторные, удовлетворенность
+                        Убедитесь, что данные содержат ключевые слова: конверсия, автономность, экономия, повторные, удовлетворенность, рабочее время, нерабочее время, скорость ответа
                       </p>
                     </div>
                   </div>
