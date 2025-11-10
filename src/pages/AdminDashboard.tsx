@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, MessageSquare, TrendingUp, DollarSign, Users } from "lucide-react";
+import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
@@ -274,7 +274,7 @@ export default function AdminDashboard() {
               <KpiCard
                 title="Экономия"
                 value={`${latestMetric.financial_equiv.toLocaleString()} ₽`}
-                icon={DollarSign}
+                icon={RussianRuble}
                 gradient="salmon"
               />
               <KpiCard
