@@ -69,20 +69,26 @@ export default function ClientDashboard() {
                 <span className="text-sm font-light text-green-300">Подключен</span>
               </div>
 
-              {client.phone && (() => {
+              {(() => {
                 try {
-                  const phoneNumber = parsePhoneNumber(client.phone, 'RU');
+                  const managerPhone = '+79808851903';
+                  const phoneNumber = parsePhoneNumber(managerPhone, 'RU');
                   if (phoneNumber.isValid()) {
+                    const cleanNumber = phoneNumber.number.replace(/\+/g, '');
+                    const message = encodeURIComponent(`Здравствуйте! Пишу вам по поводу ИИ-ассистента для ${client.company_name}.`);
+                    
+                    const handleWhatsAppClick = () => {
+                      window.open(`https://web.whatsapp.com/send?phone=${cleanNumber}&text=${message}`, '_blank');
+                    };
+                    
                     return (
-                      <a
-                        href={`https://wa.me/${phoneNumber.number}?text=${encodeURIComponent('Здравствуйте! Пишу вам по поводу ИИ-ассистента.')}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={handleWhatsAppClick}
                         className="flex items-center space-x-2 mt-4 sm:mt-0 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl shadow-md transition transform hover:scale-105 w-fit"
                       >
                         <MessageSquare className="w-5 h-5" />
                         <span className="text-sm font-light">Связаться с менеджером</span>
-                      </a>
+                      </button>
                     );
                   }
                 } catch (error) {
