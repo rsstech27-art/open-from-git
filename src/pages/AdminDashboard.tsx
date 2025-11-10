@@ -434,141 +434,179 @@ export default function AdminDashboard() {
 
   if (showClientCard) {
     return (
-      <div className="min-h-screen bg-background p-4 md:p-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <Button
-              variant="ghost"
-              className="text-primary hover:text-primary/80"
-              onClick={() => setShowClientCard(false)}
-            >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Вернуться к дашборду
-            </Button>
-            <Button variant="outline" onClick={signOut}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Выйти
-            </Button>
-          </div>
-
-          <Card className="bg-card text-foreground p-8 rounded-2xl shadow-lg">
-            <h2 className="text-3xl font-light mb-8 pb-4 border-b border-border">
-              Карточка клиента
-            </h2>
-
-            <div className="space-y-6">
-              <Card className="bg-muted border p-4 rounded-xl">
-                <div className="flex items-start space-x-4">
-                  <Users className="w-8 h-8 text-primary" />
-                  <div className="flex-1">
-                    <Label className="text-sm text-foreground/70 mb-2 block">Закрепленный менеджер</Label>
-                    <Select 
-                      value={selectedClient?.manager_name || "unassigned"} 
-                      onValueChange={handleManagerChange}
-                    >
-                      <SelectTrigger className="bg-background border text-foreground rounded-lg h-12">
-                        <SelectValue placeholder="Выберите менеджера" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-popover border shadow-lg z-[100]">
-                        <SelectItem value="unassigned">Не назначен</SelectItem>
-                        {managers.map((manager) => (
-                          <SelectItem key={manager.id} value={manager.name} className="cursor-pointer">
-                            {manager.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="bg-muted border p-4 flex items-start space-x-4 rounded-xl">
-                <MessageSquare className="w-8 h-8 text-primary" />
-                <div>
-                  <p className="text-sm text-foreground/70">Название компании</p>
-                  <p className="text-xl font-light text-foreground">{selectedClient?.company_name}</p>
-                </div>
-              </Card>
-
-              <Card className="bg-muted border p-4 flex items-start space-x-4 rounded-xl">
-                <Users className="w-8 h-8 text-primary" />
-                <div>
-                  <p className="text-sm text-foreground/70">Имя клиента</p>
-                  <p className="text-xl font-light text-foreground">{selectedClient?.client_name || "Не указано"}</p>
-                </div>
-              </Card>
-
-              <Card className="bg-muted border p-4 rounded-xl">
-                <div className="flex items-start space-x-4 mb-4">
-                  <MessageSquare className="w-8 h-8 text-green-500" />
-                  <div className="flex-1">
-                    <p className="text-sm text-foreground/70">Контактный телефон</p>
-                    <p className="text-xl font-light text-foreground">{selectedClient?.phone || "Не указан"}</p>
-                  </div>
-                </div>
-                
-                {selectedClient?.phone && (() => {
-                  try {
-                    const phoneNumber = parsePhoneNumber(selectedClient.phone, 'RU');
-                    if (phoneNumber.isValid()) {
-                      const cleanNumber = phoneNumber.number.replace(/\+/g, '');
-                      const message = encodeURIComponent(`Здравствуйте! Это сообщение от ${selectedClient.company_name}.`);
-                      
-                      const handleWhatsAppClick = () => {
-                        // Try web.whatsapp.com instead of wa.me if blocked
-                        window.open(`https://web.whatsapp.com/send?phone=${cleanNumber}&text=${message}`, '_blank');
-                      };
-                      
-                      return (
-                        <button
-                          onClick={handleWhatsAppClick}
-                          className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white rounded-lg py-3 shadow-md transition transform hover:scale-105"
-                        >
-                          <MessageSquare className="w-5 h-5" />
-                          <span className="font-medium">Написать в WhatsApp</span>
-                        </button>
-                      );
-                    }
-                  } catch (error) {
-                    console.error('Invalid phone number:', error);
-                  }
-                  return (
-                    <div className="flex items-center justify-center gap-2 w-full bg-muted border border-border text-muted-foreground rounded-lg py-3">
-                      <MessageSquare className="w-5 h-5" />
-                      <span>Некорректный номер телефона</span>
-                    </div>
-                  );
-                })()}
-              </Card>
-
-              <h3 className="text-2xl font-light mt-10 pt-5 border-t border-border">
-                Доступ в личный кабинет
-              </h3>
-
-              <Card className="bg-muted border p-6 space-y-4 rounded-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="text-sm text-foreground/70 mb-1">Email клиента:</p>
-                    <p className="text-lg font-mono text-foreground">{selectedClient?.email || "Не указан"}</p>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setNewEmail(selectedClient?.email || "");
-                      setShowEmailDialog(true);
-                    }}
-                  >
-                    Изменить email
-                  </Button>
-                </div>
-                <div className="text-sm text-muted-foreground mt-4 p-3 bg-background rounded-lg border border-border">
-                  <p>При изменении email клиента будут обновлены данные для входа в систему.</p>
-                </div>
-              </Card>
+      <>
+        <div className="min-h-screen bg-background p-4 md:p-8">
+          <div className="max-w-3xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+              <Button
+                variant="ghost"
+                className="text-primary hover:text-primary/80"
+                onClick={() => setShowClientCard(false)}
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" />
+                Вернуться к дашборду
+              </Button>
+              <Button variant="outline" onClick={signOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Выйти
+              </Button>
             </div>
-          </Card>
+
+            <Card className="bg-card text-foreground p-8 rounded-2xl shadow-lg">
+              <h2 className="text-3xl font-light mb-8 pb-4 border-b border-border">
+                Карточка клиента
+              </h2>
+
+              <div className="space-y-6">
+                <Card className="bg-muted border p-4 rounded-xl">
+                  <div className="flex items-start space-x-4">
+                    <Users className="w-8 h-8 text-primary" />
+                    <div className="flex-1">
+                      <Label className="text-sm text-foreground/70 mb-2 block">Закрепленный менеджер</Label>
+                      <Select 
+                        value={selectedClient?.manager_name || "unassigned"} 
+                        onValueChange={handleManagerChange}
+                      >
+                        <SelectTrigger className="bg-background border text-foreground rounded-lg h-12">
+                          <SelectValue placeholder="Выберите менеджера" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-popover border shadow-lg z-[100]">
+                          <SelectItem value="unassigned">Не назначен</SelectItem>
+                          {managers.map((manager) => (
+                            <SelectItem key={manager.id} value={manager.name} className="cursor-pointer">
+                              {manager.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </Card>
+
+                <Card className="bg-muted border p-4 flex items-start space-x-4 rounded-xl">
+                  <MessageSquare className="w-8 h-8 text-primary" />
+                  <div>
+                    <p className="text-sm text-foreground/70">Название компании</p>
+                    <p className="text-xl font-light text-foreground">{selectedClient?.company_name}</p>
+                  </div>
+                </Card>
+
+                <Card className="bg-muted border p-4 flex items-start space-x-4 rounded-xl">
+                  <Users className="w-8 h-8 text-primary" />
+                  <div>
+                    <p className="text-sm text-foreground/70">Имя клиента</p>
+                    <p className="text-xl font-light text-foreground">{selectedClient?.client_name || "Не указано"}</p>
+                  </div>
+                </Card>
+
+                <Card className="bg-muted border p-4 rounded-xl">
+                  <div className="flex items-start space-x-4 mb-4">
+                    <MessageSquare className="w-8 h-8 text-green-500" />
+                    <div className="flex-1">
+                      <p className="text-sm text-foreground/70">Контактный телефон</p>
+                      <p className="text-xl font-light text-foreground">{selectedClient?.phone || "Не указан"}</p>
+                    </div>
+                  </div>
+                  
+                  {selectedClient?.phone && (() => {
+                    try {
+                      const phoneNumber = parsePhoneNumber(selectedClient.phone, 'RU');
+                      if (phoneNumber.isValid()) {
+                        const cleanNumber = phoneNumber.number.replace(/\+/g, '');
+                        const message = encodeURIComponent(`Здравствуйте! Это сообщение от ${selectedClient.company_name}.`);
+                        
+                        const handleWhatsAppClick = () => {
+                          // Try web.whatsapp.com instead of wa.me if blocked
+                          window.open(`https://web.whatsapp.com/send?phone=${cleanNumber}&text=${message}`, '_blank');
+                        };
+                        
+                        return (
+                          <button
+                            onClick={handleWhatsAppClick}
+                            className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white rounded-lg py-3 shadow-md transition transform hover:scale-105"
+                          >
+                            <MessageSquare className="w-5 h-5" />
+                            <span className="font-medium">Написать в WhatsApp</span>
+                          </button>
+                        );
+                      }
+                    } catch (error) {
+                      console.error('Invalid phone number:', error);
+                    }
+                    return (
+                      <div className="flex items-center justify-center gap-2 w-full bg-muted border border-border text-muted-foreground rounded-lg py-3">
+                        <MessageSquare className="w-5 h-5" />
+                        <span>Некорректный номер телефона</span>
+                      </div>
+                    );
+                  })()}
+                </Card>
+
+                <h3 className="text-2xl font-light mt-10 pt-5 border-t border-border">
+                  Доступ в личный кабинет
+                </h3>
+
+                <Card className="bg-muted border p-6 space-y-4 rounded-xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <p className="text-sm text-foreground/70 mb-1">Email клиента:</p>
+                      <p className="text-lg font-mono text-foreground">{selectedClient?.email || "Не указан"}</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setNewEmail(selectedClient?.email || "");
+                        setShowEmailDialog(true);
+                      }}
+                    >
+                      Изменить email
+                    </Button>
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-4 p-3 bg-background rounded-lg border border-border">
+                    <p>При изменении email клиента будут обновлены данные для входа в систему.</p>
+                  </div>
+                </Card>
+              </div>
+            </Card>
+          </div>
         </div>
-      </div>
+
+        {/* Email Update Dialog */}
+        <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Изменить email клиента</DialogTitle>
+              <DialogDescription>
+                Новый email будет использоваться для входа в систему
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="new-email">Новый email</Label>
+                <Input
+                  id="new-email"
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="client@example.com"
+                  className="mt-2"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEmailDialog(false)}>
+                Отмена
+              </Button>
+              <Button 
+                onClick={handleUpdateEmail}
+                disabled={updateClientEmail.isPending}
+              >
+                {updateClientEmail.isPending ? "Изменение..." : "Изменить"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 
