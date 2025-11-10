@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ArrowLeft, MessageSquare, TrendingUp, RussianRuble, Users, LogOut, Plus, CheckCircle2, AlertCircle } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
 import BarChartCard from "@/components/dashboard/BarChartCard";
@@ -53,6 +54,13 @@ export default function AdminDashboard() {
   const [newCompanyName, setNewCompanyName] = useState("");
   const [newClientName, setNewClientName] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewMetrics, setPreviewMetrics] = useState<{
+    conversion: number;
+    autonomy: number;
+    financial_equiv: number;
+    retention_share: number;
+  } | null>(null);
 
   const { data: clients = [], isLoading: clientsLoading } = useClients();
   const { data: selectedClient } = useClient(selectedClientId);
@@ -111,7 +119,7 @@ export default function AdminDashboard() {
     };
   };
 
-  const handleSaveData = async (e: React.FormEvent) => {
+  const handlePreviewData = (e: React.FormEvent) => {
     e.preventDefault();
     
     const result = clientDataSchema.safeParse({ data: clientData });
@@ -132,19 +140,27 @@ export default function AdminDashboard() {
     }
 
     const parsedMetrics = parseMetricsData(clientData);
+    setPreviewMetrics(parsedMetrics);
+    setShowPreview(true);
+  };
+
+  const handleConfirmSave = async () => {
+    if (!previewMetrics) return;
 
     await createMetric.mutateAsync({
       client_id: selectedClientId,
       date: new Date().toISOString().split('T')[0],
       period_type: reportPeriod,
-      conversion: parsedMetrics.conversion,
-      autonomy: parsedMetrics.autonomy,
-      financial_equiv: parsedMetrics.financial_equiv,
-      retention_share: parsedMetrics.retention_share,
+      conversion: previewMetrics.conversion,
+      autonomy: previewMetrics.autonomy,
+      financial_equiv: previewMetrics.financial_equiv,
+      retention_share: previewMetrics.retention_share,
     });
 
     setClientData("");
     setReportPeriod("2025-10");
+    setShowPreview(false);
+    setPreviewMetrics(null);
   };
 
   const handleStatusChange = async (newStatus: string) => {
@@ -600,7 +616,7 @@ export default function AdminDashboard() {
           <h3 className="text-xl font-light mb-4 pb-3 border-b border-border">
             Внесение данных клиента за период
           </h3>
-          <form onSubmit={handleSaveData} className="space-y-4">
+          <form onSubmit={handlePreviewData} className="space-y-4">
             <div>
               <Label htmlFor="reportPeriod">Период отчета</Label>
               <Select value={reportPeriod} onValueChange={setReportPeriod}>
@@ -637,12 +653,112 @@ export default function AdminDashboard() {
               type="submit" 
               className="w-full rounded-lg" 
               variant="secondary"
-              disabled={createMetric.isPending}
             >
-              {createMetric.isPending ? "Сохранение..." : "Сохранить изменения"}
+              Предпросмотр метрик
             </Button>
           </form>
         </Card>
+
+        <Dialog open={showPreview} onOpenChange={setShowPreview}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-light">Предпросмотр распознанных метрик</DialogTitle>
+              <DialogDescription>
+                Проверьте правильность распознанных данных перед сохранением
+              </DialogDescription>
+            </DialogHeader>
+
+            {previewMetrics && (
+              <div className="space-y-4">
+                <Card className="p-4 bg-muted">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-purple-500" />
+                      <span className="font-medium">Конверсия в запись</span>
+                    </div>
+                    {previewMetrics.conversion > 0 ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-2xl font-light">{(previewMetrics.conversion * 100).toFixed(1)}%</p>
+                </Card>
+
+                <Card className="p-4 bg-muted">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-cyan-500" />
+                      <span className="font-medium">Автономность</span>
+                    </div>
+                    {previewMetrics.autonomy > 0 ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-2xl font-light">{(previewMetrics.autonomy * 100).toFixed(1)}%</p>
+                </Card>
+
+                <Card className="p-4 bg-muted">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <RussianRuble className="w-5 h-5 text-red-500" />
+                      <span className="font-medium">Экономия</span>
+                    </div>
+                    {previewMetrics.financial_equiv > 0 ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-2xl font-light">{previewMetrics.financial_equiv.toLocaleString()} ₽</p>
+                </Card>
+
+                <Card className="p-4 bg-muted">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-5 h-5 text-green-500" />
+                      <span className="font-medium">Повторные клиенты</span>
+                    </div>
+                    {previewMetrics.retention_share > 0 ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-yellow-500" />
+                    )}
+                  </div>
+                  <p className="text-2xl font-light">{(previewMetrics.retention_share * 100).toFixed(1)}%</p>
+                </Card>
+
+                {(previewMetrics.conversion === 0 || previewMetrics.autonomy === 0 || 
+                  previewMetrics.financial_equiv === 0 || previewMetrics.retention_share === 0) && (
+                  <div className="flex items-start gap-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
+                    <div className="text-sm">
+                      <p className="font-medium text-yellow-700 dark:text-yellow-400">Некоторые метрики не распознаны</p>
+                      <p className="text-muted-foreground mt-1">
+                        Убедитесь, что данные содержат ключевые слова: конверсия, автономность, экономия, повторные
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setShowPreview(false)}>
+                Отмена
+              </Button>
+              <Button 
+                variant="secondary" 
+                onClick={handleConfirmSave}
+                disabled={createMetric.isPending}
+              >
+                {createMetric.isPending ? "Сохранение..." : "Подтвердить и сохранить"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
