@@ -96,7 +96,7 @@ export function useCreateClient() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newClient: { company_name: string; phone: string }) => {
+    mutationFn: async (newClient: { company_name: string; manager_name: string; phone: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) throw new Error("Не авторизован");
@@ -105,6 +105,7 @@ export function useCreateClient() {
         .from("clients")
         .insert({
           company_name: newClient.company_name,
+          manager_name: newClient.manager_name,
           phone: newClient.phone,
           user_id: user.id,
           status: "active"

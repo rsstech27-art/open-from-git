@@ -29,6 +29,10 @@ const newClientSchema = z.object({
     .trim()
     .min(1, "Название компании обязательно")
     .max(100, "Название не должно превышать 100 символов"),
+  managerName: z.string()
+    .trim()
+    .min(1, "Имя менеджера обязательно")
+    .max(100, "Имя не должно превышать 100 символов"),
   phone: z.string()
     .trim()
     .min(1, "Контактный номер обязателен")
@@ -44,6 +48,7 @@ export default function AdminDashboard() {
   const [clientData, setClientData] = useState("");
   const [aiStatus, setAiStatus] = useState("active");
   const [newCompanyName, setNewCompanyName] = useState("");
+  const [newManagerName, setNewManagerName] = useState("");
   const [newPhone, setNewPhone] = useState("");
 
   const { data: clients = [], isLoading: clientsLoading } = useClients();
@@ -100,6 +105,7 @@ export default function AdminDashboard() {
     
     const result = newClientSchema.safeParse({
       companyName: newCompanyName,
+      managerName: newManagerName,
       phone: newPhone
     });
     
@@ -110,10 +116,12 @@ export default function AdminDashboard() {
 
     await createClient.mutateAsync({
       company_name: newCompanyName,
+      manager_name: newManagerName,
       phone: newPhone
     });
     
     setNewCompanyName("");
+    setNewManagerName("");
     setNewPhone("");
     setShowCreateForm(false);
   };
@@ -173,6 +181,18 @@ export default function AdminDashboard() {
                   value={newCompanyName}
                   onChange={(e) => setNewCompanyName(e.target.value)}
                   placeholder="ООО Компания"
+                  className="mt-2"
+                  maxLength={100}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="managerName">Имя менеджера</Label>
+                <Input
+                  id="managerName"
+                  value={newManagerName}
+                  onChange={(e) => setNewManagerName(e.target.value)}
+                  placeholder="Иван Иванов"
                   className="mt-2"
                   maxLength={100}
                 />
