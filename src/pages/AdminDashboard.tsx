@@ -806,7 +806,7 @@ export default function AdminDashboard() {
                   { name: "Подтверждено", value: aggregatedMetric.confirmed_appointments || 0 },
                   { name: "Всего диалогов", value: (aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0) - (aggregatedMetric.confirmed_appointments || 0) },
                 ]}
-                colors={["hsl(160 65% 55%)", "hsl(280 70% 60%)"]}
+                colors={["hsl(160 80% 65%)", "hsl(280 85% 70%)"]}
               />
               <DoughnutChartCard
                 title="Записи по времени"
@@ -814,7 +814,7 @@ export default function AdminDashboard() {
                   { name: "Рабочее время", value: aggregatedMetric.business_hours_appointments },
                   { name: "Нерабочее время", value: aggregatedMetric.non_business_hours_appointments },
                 ]}
-                colors={["hsl(189 94% 43%)", "hsl(330 85% 65%)"]}
+                colors={["hsl(189 94% 58%)", "hsl(330 90% 72%)"]}
               />
               <DoughnutChartCard
                 title="Длительность диалогов"
@@ -823,7 +823,7 @@ export default function AdminDashboard() {
                   { name: "Средние", value: aggregatedMetric.medium_dialogs },
                   { name: "Длинные", value: aggregatedMetric.long_dialogs },
                 ]}
-                colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
+                colors={["hsl(189 94% 58%)", "hsl(280 85% 70%)", "hsl(330 90% 72%)"]}
               />
             </div>
           </div>
