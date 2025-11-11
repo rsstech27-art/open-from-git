@@ -48,6 +48,13 @@ All colors MUST be HSL.
     --gradient-cyan-end: 180 90% 50%;
     --gradient-lime-start: 100 70% 60%;
     --gradient-lime-end: 110 75% 55%;
+    
+    --gradient-purple-start: 220 80% 55%;
+    --gradient-purple-end: 230 75% 60%;
+    --gradient-salmon-start: 189 94% 43%;
+    --gradient-salmon-end: 180 90% 50%;
+    --gradient-green-start: 100 70% 60%;
+    --gradient-green-end: 110 75% 55%;
   }
 
   .dark {
