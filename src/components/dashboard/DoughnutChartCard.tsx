@@ -44,9 +44,10 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
               dataKey="value"
               label={renderLabel}
               labelLine={false}
+              stroke="none"
             >
               {data.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} stroke={colors[index % colors.length]} />
               ))}
             </Pie>
             <Tooltip />
