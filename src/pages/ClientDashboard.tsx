@@ -258,8 +258,8 @@ export default function ClientDashboard() {
                 gradient="salmon"
               />
               <KpiCard
-                title="Подтвержденные записи"
-                value={`${aggregatedMetric.confirmed_appointments || 0} шт`}
+                title="Количество записей"
+                value={`${(aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0)} шт`}
                 icon={CheckCircle2}
                 gradient="green"
               />
@@ -325,11 +325,15 @@ export default function ClientDashboard() {
                 icon={<Smile className="h-4 w-4 text-muted-foreground" />}
               />
               <DoughnutChartCard
-                title="Подтвержденные записи (шт)"
-                data={[
-                  { name: "Подтверждено", value: aggregatedMetric.confirmed_appointments || 0 },
-                  { name: "Не подтверждено", value: (aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0) - (aggregatedMetric.confirmed_appointments || 0) },
-                ]}
+                title="Подтвержденные записи (%)"
+                data={(() => {
+                  const total = (aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0);
+                  const confirmed = aggregatedMetric.confirmed_appointments || 0;
+                  return [
+                    { name: "Подтверждено", value: total > 0 ? Number(((confirmed / total) * 100).toFixed(1)) : 0 },
+                    { name: "Не подтверждено", value: total > 0 ? Number((((total - confirmed) / total) * 100).toFixed(1)) : 0 },
+                  ];
+                })()}
                 colors={["hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
               />
               <DoughnutChartCard
