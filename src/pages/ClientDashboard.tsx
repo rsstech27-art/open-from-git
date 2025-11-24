@@ -325,10 +325,10 @@ export default function ClientDashboard() {
                 icon={<Smile className="h-4 w-4 text-muted-foreground" />}
               />
               <DoughnutChartCard
-                title="Подтвержденные записи"
+                title="Подтвержденные записи (шт)"
                 data={[
                   { name: "Подтверждено", value: aggregatedMetric.confirmed_appointments || 0 },
-                  { name: "Всего диалогов", value: (aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0) - (aggregatedMetric.confirmed_appointments || 0) },
+                  { name: "Не подтверждено", value: (aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0) - (aggregatedMetric.confirmed_appointments || 0) },
                 ]}
                 colors={["hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
               />
