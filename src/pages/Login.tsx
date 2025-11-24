@@ -16,6 +16,20 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { LogOut } from "lucide-react";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().email("Неверный формат email").max(255, "Email слишком длинный"),
+  password: z.string().min(6, "Пароль должен содержать минимум 6 символов").max(100, "Пароль слишком длинный"),
+});
+
+const registerSchema = loginSchema.extend({
+  fullName: z.string().trim().min(1, "Пожалуйста, укажите ваше имя").max(100, "Имя слишком длинное"),
+});
+
+const resetSchema = z.object({
+  email: z.string().email("Неверный формат email").max(255, "Email слишком длинный"),
+});
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -49,8 +63,11 @@ export default function Login() {
 
     try {
       if (isRegister) {
-        if (!fullName.trim()) {
-          toast.error("Пожалуйста, укажите ваше имя");
+        const validation = registerSchema.safeParse({ email, password, fullName });
+        
+        if (!validation.success) {
+          const firstError = Object.values(validation.error.flatten().fieldErrors)[0]?.[0];
+          toast.error(firstError || "Проверьте введенные данные");
           setLoading(false);
           return;
         }
@@ -68,6 +85,15 @@ export default function Login() {
           setIsRegister(false);
         }
       } else {
+        const validation = loginSchema.safeParse({ email, password });
+        
+        if (!validation.success) {
+          const firstError = Object.values(validation.error.flatten().fieldErrors)[0]?.[0];
+          toast.error(firstError || "Проверьте введенные данные");
+          setLoading(false);
+          return;
+        }
+
         const { error } = await signIn(email, password);
         
         if (error) {
@@ -92,6 +118,15 @@ export default function Login() {
     setResetLoading(true);
 
     try {
+      const validation = resetSchema.safeParse({ email: resetEmail });
+      
+      if (!validation.success) {
+        const firstError = Object.values(validation.error.flatten().fieldErrors)[0]?.[0];
+        toast.error(firstError || "Проверьте введенные данные");
+        setResetLoading(false);
+        return;
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
@@ -139,6 +174,7 @@ export default function Login() {
                 type="text"
                 required
                 placeholder="Иван Иванов"
+                maxLength={100}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
               />
@@ -152,6 +188,7 @@ export default function Login() {
               type="email"
               required
               placeholder="your@email.com"
+              maxLength={255}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -165,6 +202,7 @@ export default function Login() {
               required
               placeholder="••••••••"
               minLength={6}
+              maxLength={100}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -209,6 +247,7 @@ export default function Login() {
                       type="email"
                       required
                       placeholder="your@email.com"
+                      maxLength={255}
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
                     />
