@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, MessageSquare, TrendingUp, Users, LogOut, Plus, CheckCircle2, AlertCircle, Smile, Clock } from "lucide-react";
 import KpiCard from "@/components/dashboard/KpiCard";
 import LineChartCard from "@/components/dashboard/LineChartCard";
@@ -19,6 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useClients, useClient, useUpdateClient, useCreateClient, useUpdateClientEmail } from "@/hooks/useClients";
 import { useManagers } from "@/hooks/useManagers";
 import { useMetrics, useCreateMetric } from "@/hooks/useMetrics";
+import { supabase } from "@/integrations/supabase/client";
 
 const clientDataSchema = z.object({
   data: z.string()
@@ -57,6 +59,16 @@ export default function AdminDashboard() {
   const [newPhone, setNewPhone] = useState("");
   const [showEmailDialog, setShowEmailDialog] = useState(false);
   const [newEmail, setNewEmail] = useState("");
+  const [updateFlags, setUpdateFlags] = useState({
+    conversion: true,
+    autonomy: true,
+    time_saved_hours: true,
+    confirmed_appointments: true,
+    satisfaction: true,
+    appointments_time: true,
+    dialogs: true,
+    new_vs_returning: true,
+  });
 
   const { data: clients = [], isLoading: clientsLoading } = useClients();
   const { data: selectedClient } = useClient(selectedClientId);
@@ -171,8 +183,10 @@ export default function AdminDashboard() {
     const timeSavedMatch = data.match(/эконом[иія]+[\s:]+(\d+)/i);
     const confirmedAppointmentsMatch = data.match(/(?:подтвержд[ыхе]+|повторн[ыхе]+|запис[ьияе]+)[\s:]+(\d+)/i);
     const satisfactionMatch = data.match(/удовлетворенност[ьи][\s:]+(\d+[.,]?\d*)/i);
-    const businessHoursMatch = data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+)/i);
-    const nonBusinessHoursMatch = data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)[\s:]+(\d+)/i);
+    const businessHoursMatch = data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+[.,]?\d*)/i)
+      || data.match(/(\d+[.,]?\d*)[^0-9]{0,15}(?:в\s+рабочее(?:\s+время)?|рабоч[иеа]+(?:\s+врем[яи]+)?)/i);
+    const nonBusinessHoursMatch = data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)[\s:]+(\d+[.,]?\d*)/i)
+      || data.match(/(\d+[.,]?\d*)[^0-9]{0,15}(?:в\s+нерабочее(?:\s+время)?|нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)/i);
     const totalDialogsMatch = data.match(/(?:диалог[иова]+|количество)[\s:]+(\d+)/i);
     const newClientsMatch = data.match(/(?:нов[ыхе]+|новые\s+клиент[ыи])[\s:]+(\d+)/i);
     const returningClientsMatch = data.match(/(?:повторн[ыхе]+|повторные\s+клиент[ыи])[\s:]+(\d+)/i);
@@ -183,14 +197,13 @@ export default function AdminDashboard() {
       time_saved_hours: timeSavedMatch ? parseInt(timeSavedMatch[1]) : 0,
       confirmed_appointments: confirmedAppointmentsMatch ? parseInt(confirmedAppointmentsMatch[1]) : 0,
       satisfaction: satisfactionMatch ? parseFloat(satisfactionMatch[1].replace(',', '.')) / 100 : 0,
-      business_hours_appointments: businessHoursMatch ? parseInt(businessHoursMatch[1]) : 0,
-      non_business_hours_appointments: nonBusinessHoursMatch ? parseInt(nonBusinessHoursMatch[1]) : 0,
+      business_hours_appointments: businessHoursMatch ? parseFloat((businessHoursMatch[1] || '').replace(',', '.')) : 0,
+      non_business_hours_appointments: nonBusinessHoursMatch ? parseFloat((nonBusinessHoursMatch[1] || '').replace(',', '.')) : 0,
       short_dialogs: totalDialogsMatch ? parseInt(totalDialogsMatch[1]) : 0,
       medium_dialogs: newClientsMatch ? parseInt(newClientsMatch[1]) : 0,
       long_dialogs: returningClientsMatch ? parseInt(returningClientsMatch[1]) : 0,
     };
   };
-
   const handleSaveData = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -200,36 +213,79 @@ export default function AdminDashboard() {
       toast.error(result.error.errors[0].message);
       return;
     }
-
+ 
     if (!selectedClientId) {
       toast.error("Выберите клиента");
       return;
     }
-
+ 
     if (!reportPeriod) {
       toast.error("Выберите период отчета");
       return;
     }
-
+ 
     const parsedMetrics = parseMetricsData(clientData);
-
+ 
     try {
-      await createMetric.mutateAsync({
+      // Получаем текущую метрику для клиента и периода, чтобы при необходимости обновлять только часть полей
+      const { data: existingMetric, error: existingError } = await supabase
+        .from("metrics")
+        .select("*")
+        .eq("client_id", selectedClientId)
+        .eq("period_type", reportPeriod)
+        .maybeSingle();
+ 
+      if (existingError) {
+        console.error("Error loading existing metric:", existingError);
+      }
+ 
+      const baseMetric = existingMetric ?? {
         client_id: selectedClientId,
         date: new Date().toISOString().split('T')[0],
         period_type: reportPeriod,
-        conversion: parsedMetrics.conversion,
-        autonomy: parsedMetrics.autonomy,
-        time_saved_hours: parsedMetrics.time_saved_hours,
-        confirmed_appointments: parsedMetrics.confirmed_appointments,
-        satisfaction: parsedMetrics.satisfaction,
-        business_hours_appointments: parsedMetrics.business_hours_appointments,
-        non_business_hours_appointments: parsedMetrics.non_business_hours_appointments,
-        short_dialogs: parsedMetrics.short_dialogs,
-        medium_dialogs: parsedMetrics.medium_dialogs,
-        long_dialogs: parsedMetrics.long_dialogs,
-      });
-
+        conversion: 0,
+        autonomy: 0,
+        time_saved_hours: 0,
+        confirmed_appointments: 0,
+        satisfaction: 0,
+        business_hours_appointments: 0,
+        non_business_hours_appointments: 0,
+        short_dialogs: 0,
+        medium_dialogs: 0,
+        long_dialogs: 0,
+      };
+ 
+      const metricToSave = { ...baseMetric } as any;
+ 
+      if (updateFlags.conversion) {
+        metricToSave.conversion = parsedMetrics.conversion;
+      }
+      if (updateFlags.autonomy) {
+        metricToSave.autonomy = parsedMetrics.autonomy;
+      }
+      if (updateFlags.time_saved_hours) {
+        metricToSave.time_saved_hours = parsedMetrics.time_saved_hours;
+      }
+      if (updateFlags.confirmed_appointments) {
+        metricToSave.confirmed_appointments = parsedMetrics.confirmed_appointments;
+      }
+      if (updateFlags.satisfaction) {
+        metricToSave.satisfaction = parsedMetrics.satisfaction;
+      }
+      if (updateFlags.appointments_time) {
+        metricToSave.business_hours_appointments = parsedMetrics.business_hours_appointments;
+        metricToSave.non_business_hours_appointments = parsedMetrics.non_business_hours_appointments;
+      }
+      if (updateFlags.dialogs) {
+        metricToSave.short_dialogs = parsedMetrics.short_dialogs;
+      }
+      if (updateFlags.new_vs_returning) {
+        metricToSave.medium_dialogs = parsedMetrics.medium_dialogs;
+        metricToSave.long_dialogs = parsedMetrics.long_dialogs;
+      }
+ 
+      await createMetric.mutateAsync(metricToSave);
+ 
       setClientData("");
       setReportPeriod("2025-10");
     } catch (error) {
@@ -822,7 +878,7 @@ export default function AdminDashboard() {
             
             <div>
               <Label htmlFor="clientData">Данные клиента</Label>
-                <Textarea
+              <Textarea
                 id="clientData"
                 className="bg-muted border text-foreground mt-2 rounded-lg"
                 rows={8}
@@ -834,6 +890,67 @@ export default function AdminDashboard() {
               <p className="text-sm text-muted-foreground mt-2">
                 {clientData.length}/5000 символов
               </p>
+              <div className="mt-4 space-y-2">
+                <p className="text-sm text-muted-foreground">Что обновлять из вставленных данных:</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={updateFlags.conversion}
+                      onCheckedChange={(checked) => setUpdateFlags((prev) => ({ ...prev, conversion: Boolean(checked) }))}
+                    />
+                    <span>Конверсия</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={updateFlags.autonomy}
+                      onCheckedChange={(checked) => setUpdateFlags((prev) => ({ ...prev, autonomy: Boolean(checked) }))}
+                    />
+                    <span>Автономность</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={updateFlags.time_saved_hours}
+                      onCheckedChange={(checked) => setUpdateFlags((prev) => ({ ...prev, time_saved_hours: Boolean(checked) }))}
+                    />
+                    <span>Экономия времени</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={updateFlags.confirmed_appointments}
+                      onCheckedChange={(checked) => setUpdateFlags((prev) => ({ ...prev, confirmed_appointments: Boolean(checked) }))}
+                    />
+                    <span>Подтвержденные записи</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={updateFlags.satisfaction}
+                      onCheckedChange={(checked) => setUpdateFlags((prev) => ({ ...prev, satisfaction: Boolean(checked) }))}
+                    />
+                    <span>Удовлетворенность</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={updateFlags.appointments_time}
+                      onCheckedChange={(checked) => setUpdateFlags((prev) => ({ ...prev, appointments_time: Boolean(checked) }))}
+                    />
+                    <span>Записи по времени</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={updateFlags.dialogs}
+                      onCheckedChange={(checked) => setUpdateFlags((prev) => ({ ...prev, dialogs: Boolean(checked) }))}
+                    />
+                    <span>Количество диалогов</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={updateFlags.new_vs_returning}
+                      onCheckedChange={(checked) => setUpdateFlags((prev) => ({ ...prev, new_vs_returning: Boolean(checked) }))}
+                    />
+                    <span>Новые / повторные клиенты</span>
+                  </label>
+                </div>
+              </div>
             </div>
             
             <Button 
