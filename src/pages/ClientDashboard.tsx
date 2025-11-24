@@ -258,9 +258,9 @@ export default function ClientDashboard() {
                 gradient="salmon"
               />
               <KpiCard
-                title="Количество записей"
+                title="Количество диалогов"
                 value={`${(aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0)} шт`}
-                icon={CheckCircle2}
+                icon={Users}
                 gradient="green"
               />
             </div>
