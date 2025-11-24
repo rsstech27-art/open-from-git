@@ -173,9 +173,6 @@ export default function AdminDashboard() {
     const satisfactionMatch = data.match(/удовлетворенност[ьи][\s:]+(\d+[.,]?\d*)/i);
     const businessHoursMatch = data.match(/рабоч[иеа]+\s+врем[яи]+[\s:]+(\d+)/i);
     const nonBusinessHoursMatch = data.match(/нерабоч[иеа]+\s+врем[яи]+[\s:]+(\d+)/i);
-    const shortDialogsMatch = data.match(/коротк[иеа]+\s+диалог[иова]+[\s:]+(\d+)/i);
-    const mediumDialogsMatch = data.match(/средн[иеа]+\s+диалог[иова]+[\s:]+(\d+)/i);
-    const longDialogsMatch = data.match(/длинн[ыеа]+\s+диалог[иова]+[\s:]+(\d+)/i);
 
     return {
       conversion: conversionMatch ? parseFloat(conversionMatch[1].replace(',', '.')) / 100 : 0,
@@ -185,9 +182,9 @@ export default function AdminDashboard() {
       satisfaction: satisfactionMatch ? parseFloat(satisfactionMatch[1].replace(',', '.')) / 100 : 0,
       business_hours_appointments: businessHoursMatch ? parseInt(businessHoursMatch[1]) : 0,
       non_business_hours_appointments: nonBusinessHoursMatch ? parseInt(nonBusinessHoursMatch[1]) : 0,
-      short_dialogs: shortDialogsMatch ? parseInt(shortDialogsMatch[1]) : 0,
-      medium_dialogs: mediumDialogsMatch ? parseInt(mediumDialogsMatch[1]) : 0,
-      long_dialogs: longDialogsMatch ? parseInt(longDialogsMatch[1]) : 0,
+      short_dialogs: 0,
+      medium_dialogs: 0,
+      long_dialogs: 0,
     };
   };
 
@@ -818,7 +815,7 @@ export default function AdminDashboard() {
                 id="clientData"
                 className="bg-muted border text-foreground mt-2 rounded-lg"
                 rows={8}
-                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 50000, повторные 45%, удовлетворенность 90%, рабочее время 120, нерабочее время 30, короткие диалоги 50, средние диалоги 30, длинные диалоги 20)"
+                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 50000, повторные 45%, удовлетворенность 90%, рабочее время 120, нерабочее время 30)"
                 value={clientData}
                 onChange={(e) => setClientData(e.target.value)}
                 maxLength={5000}
