@@ -19,14 +19,6 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
     );
   }
 
-  // Calculate total for percentage
-  const total = data.reduce((sum, item) => sum + item.value, 0);
-
-  // Custom label to show percentage
-  const renderLabel = (entry: any) => {
-    const percent = total > 0 ? ((entry.value / total) * 100).toFixed(1) : 0;
-    return `${percent}%`;
-  };
 
   return (
     <Card className="bg-card text-foreground p-6 shadow-lg rounded-2xl">
@@ -42,8 +34,6 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
               outerRadius={100}
               paddingAngle={5}
               dataKey="value"
-              label={renderLabel}
-              labelLine={false}
               stroke="none"
             >
               {data.map((_, index) => (
