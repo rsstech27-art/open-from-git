@@ -19,6 +19,10 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
     );
   }
 
+  // Custom label to show value with % sign
+  const renderLabel = (entry: any) => {
+    return `${entry.value}%`;
+  };
 
   return (
     <Card className="bg-card text-foreground p-6 shadow-lg rounded-2xl">
@@ -34,6 +38,8 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
               outerRadius={100}
               paddingAngle={5}
               dataKey="value"
+              label={renderLabel}
+              labelLine={false}
               stroke="none"
             >
               {data.map((_, index) => (
