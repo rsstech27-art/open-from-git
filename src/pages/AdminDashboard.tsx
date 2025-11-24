@@ -744,9 +744,9 @@ export default function AdminDashboard() {
                 gradient="salmon"
               />
               <KpiCard
-                title="Подтвержденные записи"
-                value={aggregatedMetric.confirmed_appointments || 0}
-                icon={CheckCircle2}
+                title="Количество диалогов"
+                value={`${(aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0)} шт`}
+                icon={Users}
                 gradient="green"
               />
             </div>
