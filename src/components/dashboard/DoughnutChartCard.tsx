@@ -8,7 +8,9 @@ interface DoughnutChartCardProps {
 }
 
 export default function DoughnutChartCard({ title, data, colors }: DoughnutChartCardProps) {
-  if (!data || data.length === 0) {
+  const total = data?.reduce((sum, item) => sum + (isNaN(item.value) ? 0 : item.value), 0) ?? 0;
+
+  if (!data || data.length === 0 || total === 0) {
     return (
       <Card className="bg-card text-foreground p-6 shadow-lg rounded-2xl">
         <p className="text-base font-light mb-4">{title}</p>
@@ -18,6 +20,11 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
       </Card>
     );
   }
+
+  const chartData = data.map((item) => ({
+    name: item.name,
+    value: Number(((item.value / total) * 100).toFixed(1)),
+  }));
 
   // Custom label to show value with % sign
   const renderLabel = (entry: any) => {
@@ -44,7 +51,7 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={data}
+              data={chartData}
               cx="50%"
               cy="50%"
               innerRadius={60}
@@ -55,7 +62,7 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
               labelLine={false}
               stroke="none"
             >
-              {data.map((_, index) => (
+              {chartData.map((_, index) => (
                 <Cell key={`cell-${index}`} fill={colors[index % colors.length]} stroke={colors[index % colors.length]} />
               ))}
             </Pie>
