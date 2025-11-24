@@ -174,6 +174,8 @@ export default function AdminDashboard() {
     const businessHoursMatch = data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+)/i);
     const nonBusinessHoursMatch = data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)[\s:]+(\d+)/i);
     const totalDialogsMatch = data.match(/(?:диалог[иова]+|количество)[\s:]+(\d+)/i);
+    const newClientsMatch = data.match(/(?:нов[ыхе]+|новые\s+клиент[ыи])[\s:]+(\d+)/i);
+    const returningClientsMatch = data.match(/(?:повторн[ыхе]+|повторные\s+клиент[ыи])[\s:]+(\d+)/i);
 
     return {
       conversion: conversionMatch ? parseFloat(conversionMatch[1].replace(',', '.')) / 100 : 0,
@@ -184,8 +186,8 @@ export default function AdminDashboard() {
       business_hours_appointments: businessHoursMatch ? parseInt(businessHoursMatch[1]) : 0,
       non_business_hours_appointments: nonBusinessHoursMatch ? parseInt(nonBusinessHoursMatch[1]) : 0,
       short_dialogs: totalDialogsMatch ? parseInt(totalDialogsMatch[1]) : 0,
-      medium_dialogs: 0,
-      long_dialogs: 0,
+      medium_dialogs: newClientsMatch ? parseInt(newClientsMatch[1]) : 0,
+      long_dialogs: returningClientsMatch ? parseInt(returningClientsMatch[1]) : 0,
     };
   };
 
@@ -616,7 +618,7 @@ export default function AdminDashboard() {
               <div>
                 <Label className="text-muted-foreground mb-2 block">Компания</Label>
                 <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                  <SelectTrigger className="bg-muted border text-foreground rounded-lg">
+                  <SelectTrigger className="bg-muted border text-foreground rounded-lg h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -632,7 +634,7 @@ export default function AdminDashboard() {
               <div>
                 <Label className="text-muted-foreground mb-2 block">Статус ИИ</Label>
                 <Select value={aiStatus} onValueChange={handleStatusChange}>
-                  <SelectTrigger className="bg-muted border text-foreground rounded-lg">
+                  <SelectTrigger className="bg-muted border text-foreground rounded-lg h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -785,6 +787,14 @@ export default function AdminDashboard() {
                 ]}
                 colors={["hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
               />
+              <DoughnutChartCard
+                title="Новые / Повторные клиенты"
+                data={[
+                  { name: "Новые", value: aggregatedMetric.medium_dialogs || 0 },
+                  { name: "Повторные", value: aggregatedMetric.long_dialogs || 0 },
+                ]}
+                colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)"]}
+              />
             </div>
           </div>
         </div>
@@ -816,7 +826,7 @@ export default function AdminDashboard() {
                 id="clientData"
                 className="bg-muted border text-foreground mt-2 rounded-lg"
                 rows={8}
-                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 50000, повторные 45, удовлетворенность 90%, рабочее 120, нерабочее 30, диалогов 200)"
+                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 50000, повторные 45, удовлетворенность 90%, рабочее 120, нерабочее 30, диалогов 200, новые клиенты 80, повторные клиенты 120)"
                 value={clientData}
                 onChange={(e) => setClientData(e.target.value)}
                 maxLength={5000}
