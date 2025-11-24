@@ -24,6 +24,19 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
     return `${entry.value}%`;
   };
 
+  // Custom tooltip to show percentage
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-card border border-border p-2 rounded-lg shadow-lg">
+          <p className="text-foreground font-medium">{payload[0].name}</p>
+          <p className="text-primary font-bold">{payload[0].value}%</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Card className="bg-card text-foreground p-6 shadow-lg rounded-2xl">
       <p className="text-base font-light mb-4">{title}</p>
@@ -46,7 +59,7 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
                 <Cell key={`cell-${index}`} fill={colors[index % colors.length]} stroke={colors[index % colors.length]} />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Legend
               wrapperStyle={{ color: "hsl(var(--foreground))" }}
               iconType="circle"
