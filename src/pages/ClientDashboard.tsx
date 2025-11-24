@@ -259,7 +259,7 @@ export default function ClientDashboard() {
               />
               <KpiCard
                 title="Подтвержденные записи"
-                value={aggregatedMetric.confirmed_appointments || 0}
+                value={`${aggregatedMetric.confirmed_appointments || 0} шт`}
                 icon={CheckCircle2}
                 gradient="green"
               />
