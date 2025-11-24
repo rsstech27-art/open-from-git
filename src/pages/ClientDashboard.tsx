@@ -325,33 +325,12 @@ export default function ClientDashboard() {
                 icon={<Smile className="h-4 w-4 text-muted-foreground" />}
               />
               <DoughnutChartCard
-                title="Подтвержденные записи (%)"
-                data={(() => {
-                  const total = (aggregatedMetric.short_dialogs || 0) + (aggregatedMetric.medium_dialogs || 0) + (aggregatedMetric.long_dialogs || 0);
-                  const confirmed = aggregatedMetric.confirmed_appointments || 0;
-                  return [
-                    { name: "Подтверждено", value: total > 0 ? Number(((confirmed / total) * 100).toFixed(1)) : 0 },
-                    { name: "Не подтверждено", value: total > 0 ? Number((((total - confirmed) / total) * 100).toFixed(1)) : 0 },
-                  ];
-                })()}
-                colors={["hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
-              />
-              <DoughnutChartCard
                 title="Записи по времени"
                 data={[
                   { name: "Рабочее время", value: aggregatedMetric.business_hours_appointments },
                   { name: "Нерабочее время", value: aggregatedMetric.non_business_hours_appointments },
                 ]}
                 colors={["hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
-              />
-              <DoughnutChartCard
-                title="Длительность диалогов"
-                data={[
-                  { name: "Короткие", value: aggregatedMetric.short_dialogs },
-                  { name: "Средние", value: aggregatedMetric.medium_dialogs },
-                  { name: "Длинные", value: aggregatedMetric.long_dialogs },
-                ]}
-                colors={["hsl(280 70% 60%)", "hsl(330 85% 65%)", "hsl(189 94% 43%)"]}
               />
             </div>
           ) : null}
