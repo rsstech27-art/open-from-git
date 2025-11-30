@@ -16,6 +16,8 @@ export interface Metric {
   short_dialogs: number;
   medium_dialogs: number;
   long_dialogs: number;
+  new_clients?: number;
+  returning_clients?: number;
   period_type: string | null;
   created_at: string;
 }
