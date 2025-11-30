@@ -188,7 +188,7 @@ export default function AdminDashboard() {
   const parseMetricsData = (data: string) => {
     const conversionMatch = data.match(/конверси[яи][\s:]+(\d+[.,]?\d*)/i);
     const autonomyMatch = data.match(/автономност[ьи][\s:]+(\d+[.,]?\d*)/i);
-    const timeSavedMatch = data.match(/эконом[иія]+[\s:]+(\d+)/i);
+    const timeSavedMatch = data.match(/эконом[иія]+[\s:]+(\d+[.,]?\d*)/i);
     const confirmedAppointmentsMatch = data.match(/(?:подтвержд[ёеыхи]*\s*запис[ьияе]+)[\s:]+(\d+)/i);
     const satisfactionMatch = data.match(/удовлетворенност[ьи][\s:]+(\d+[.,]?\d*)/i);
     
@@ -249,7 +249,7 @@ export default function AdminDashboard() {
     return {
       conversion: conversionMatch ? parseFloat(conversionMatch[1].replace(',', '.')) / 100 : 0,
       autonomy: autonomyMatch ? parseFloat(autonomyMatch[1].replace(',', '.')) / 100 : 0,
-      time_saved_hours: timeSavedMatch ? parseInt(timeSavedMatch[1]) : 0,
+      time_saved_hours: timeSavedMatch ? parseFloat(timeSavedMatch[1].replace(',', '.')) : 0,
       confirmed_appointments: confirmedAppointmentsMatch ? parseInt(confirmedAppointmentsMatch[1]) : 0,
       satisfaction: satisfactionMatch ? parseFloat(satisfactionMatch[1].replace(',', '.')) / 100 : 0,
       business_hours_appointments: businessHours,
@@ -835,7 +835,21 @@ export default function AdminDashboard() {
               />
               <KpiCard
                 title="Экономия времени"
-                value={`${aggregatedMetric.time_saved_hours || 0} ч`}
+                value={(() => {
+                  const hours = aggregatedMetric.time_saved_hours || 0;
+                  const formatted = hours % 1 === 0 ? hours.toString() : hours.toFixed(1);
+                  const lastDigit = Math.floor(hours) % 10;
+                  const lastTwoDigits = Math.floor(hours) % 100;
+                  let word = 'часов';
+                  if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+                    word = 'часов';
+                  } else if (lastDigit === 1) {
+                    word = 'час';
+                  } else if (lastDigit >= 2 && lastDigit <= 4) {
+                    word = 'часа';
+                  }
+                  return `${formatted} ${word}`;
+                })()}
                 icon={Clock}
                 gradient="salmon"
               />
@@ -943,7 +957,7 @@ export default function AdminDashboard() {
                 id="clientData"
                 className="bg-muted border text-foreground mt-2 rounded-lg"
                 rows={8}
-                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 5 часов, подтвержденные записи 45, удовлетворенность 90%, всего записей 150, рабочее 88%, нерабочее 12%, короткие диалоги 30, средние диалоги 50, долгие диалоги 70, новые клиенты 80, повторные клиенты 120)"
+                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 5,5 часов, подтвержденные записи 45, удовлетворенность 90%, всего записей 150, рабочее 88%, нерабочее 12%, короткие диалоги 30, средние диалоги 50, долгие диалоги 70, новые клиенты 80, повторные клиенты 120)"
                 value={clientData}
                 onChange={(e) => setClientData(e.target.value)}
                 maxLength={5000}
