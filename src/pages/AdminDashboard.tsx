@@ -115,6 +115,8 @@ export default function AdminDashboard() {
         short_dialogs: 0,
         medium_dialogs: 0,
         long_dialogs: 0,
+        new_clients: 0,
+        returning_clients: 0,
       };
     }
 
@@ -135,6 +137,8 @@ export default function AdminDashboard() {
       short_dialogs: acc.short_dialogs + (m.short_dialogs || 0),
       medium_dialogs: acc.medium_dialogs + (m.medium_dialogs || 0),
       long_dialogs: acc.long_dialogs + (m.long_dialogs || 0),
+      new_clients: acc.new_clients + (m.new_clients || 0),
+      returning_clients: acc.returning_clients + (m.returning_clients || 0),
     }), {
       conversion: 0,
       autonomy: 0,
@@ -146,6 +150,8 @@ export default function AdminDashboard() {
       short_dialogs: 0,
       medium_dialogs: 0,
       long_dialogs: 0,
+      new_clients: 0,
+      returning_clients: 0,
     });
 
     // Calculate averages for percentage metrics, sum for count metrics
@@ -160,6 +166,8 @@ export default function AdminDashboard() {
       short_dialogs: sum.short_dialogs,
       medium_dialogs: sum.medium_dialogs,
       long_dialogs: sum.long_dialogs,
+      new_clients: sum.new_clients,
+      returning_clients: sum.returning_clients,
     };
   })();
 
@@ -181,15 +189,49 @@ export default function AdminDashboard() {
     const conversionMatch = data.match(/конверси[яи][\s:]+(\d+[.,]?\d*)/i);
     const autonomyMatch = data.match(/автономност[ьи][\s:]+(\d+[.,]?\d*)/i);
     const timeSavedMatch = data.match(/эконом[иія]+[\s:]+(\d+)/i);
-    const confirmedAppointmentsMatch = data.match(/(?:подтвержд[ыхе]+|повторн[ыхе]+|запис[ьияе]+)[\s:]+(\d+)/i);
+    const confirmedAppointmentsMatch = data.match(/(?:подтвержд[ёеыхи]*\s*запис[ьияе]+)[\s:]+(\d+)/i);
     const satisfactionMatch = data.match(/удовлетворенност[ьи][\s:]+(\d+[.,]?\d*)/i);
-    const businessHoursMatch = data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+[.,]?\d*)/i)
-      || data.match(/(\d+[.,]?\d*)[^0-9]{0,15}(?:в\s+рабочее(?:\s+время)?|рабоч[иеа]+(?:\s+врем[яи]+)?)/i);
-    const nonBusinessHoursMatch = data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)[\s:]+(\d+[.,]?\d*)/i)
-      || data.match(/(\d+[.,]?\d*)[^0-9]{0,15}(?:в\s+нерабочее(?:\s+время)?|нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)/i);
-    const totalDialogsMatch = data.match(/(?:диалог[иова]+|количество)[\s:]+(\d+)/i);
-    const newClientsMatch = data.match(/(?:нов[ыхе]+|новые\s+клиент[ыи])[\s:]+(\d+)/i);
-    const returningClientsMatch = data.match(/(?:повторн[ыхе]+|повторные\s+клиент[ыи])[\s:]+(\d+)/i);
+    
+    // Извлекаем общее количество записей для расчета процентов
+    const totalAppointmentsMatch = data.match(/(?:всего|общее|записей)[\s:]+(\d+)/i);
+    const totalAppointments = totalAppointmentsMatch ? parseInt(totalAppointmentsMatch[1]) : 0;
+    
+    // Ищем записи по времени - сначала проценты
+    const businessHoursPercentMatch = data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+[.,]?\d*)%/i);
+    const nonBusinessHoursPercentMatch = data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)[\s:]+(\d+[.,]?\d*)%/i);
+    
+    // Если нет процентов, ищем абсолютные числа
+    const businessHoursAbsMatch = !businessHoursPercentMatch && data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+)/i);
+    const nonBusinessHoursAbsMatch = !nonBusinessHoursPercentMatch && data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)[\s:]+(\d+)/i);
+    
+    // Рассчитываем абсолютные значения
+    let businessHours = 0;
+    let nonBusinessHours = 0;
+    
+    if (businessHoursPercentMatch && totalAppointments > 0) {
+      const percent = parseFloat(businessHoursPercentMatch[1].replace(',', '.'));
+      businessHours = Math.round((percent / 100) * totalAppointments);
+    } else if (businessHoursAbsMatch) {
+      businessHours = parseInt(businessHoursAbsMatch[1]);
+    }
+    
+    if (nonBusinessHoursPercentMatch && totalAppointments > 0) {
+      const percent = parseFloat(nonBusinessHoursPercentMatch[1].replace(',', '.'));
+      nonBusinessHours = Math.round((percent / 100) * totalAppointments);
+    } else if (nonBusinessHoursAbsMatch) {
+      nonBusinessHours = parseInt(nonBusinessHoursAbsMatch[1]);
+    }
+    
+    // Извлекаем типы диалогов
+    const shortDialogsMatch = data.match(/(?:коротк[иеа]+\s*диалог[иова]+)[\s:]+(\d+)/i);
+    const mediumDialogsMatch = data.match(/(?:средн[иеа]+\s*диалог[иова]+)[\s:]+(\d+)/i);
+    const longDialogsMatch = data.match(/(?:долг[иеа]+\s*диалог[иова]+)[\s:]+(\d+)/i);
+    const totalDialogsMatch = !shortDialogsMatch && !mediumDialogsMatch && !longDialogsMatch 
+      && data.match(/(?:диалог[иова]+|всего\s+диалогов)[\s:]+(\d+)/i);
+    
+    // Извлекаем новых и повторных клиентов
+    const newClientsMatch = data.match(/(?:нов[ыхе]+\s*клиент[ыиов]+)[\s:]+(\d+)/i);
+    const returningClientsMatch = data.match(/(?:повторн[ыхе]+\s*клиент[ыиов]+)[\s:]+(\d+)/i);
 
     return {
       conversion: conversionMatch ? parseFloat(conversionMatch[1].replace(',', '.')) / 100 : 0,
@@ -197,11 +239,13 @@ export default function AdminDashboard() {
       time_saved_hours: timeSavedMatch ? parseInt(timeSavedMatch[1]) : 0,
       confirmed_appointments: confirmedAppointmentsMatch ? parseInt(confirmedAppointmentsMatch[1]) : 0,
       satisfaction: satisfactionMatch ? parseFloat(satisfactionMatch[1].replace(',', '.')) / 100 : 0,
-      business_hours_appointments: businessHoursMatch ? parseFloat((businessHoursMatch[1] || '').replace(',', '.')) : 0,
-      non_business_hours_appointments: nonBusinessHoursMatch ? parseFloat((nonBusinessHoursMatch[1] || '').replace(',', '.')) : 0,
-      short_dialogs: totalDialogsMatch ? parseInt(totalDialogsMatch[1]) : 0,
-      medium_dialogs: newClientsMatch ? parseInt(newClientsMatch[1]) : 0,
-      long_dialogs: returningClientsMatch ? parseInt(returningClientsMatch[1]) : 0,
+      business_hours_appointments: businessHours,
+      non_business_hours_appointments: nonBusinessHours,
+      short_dialogs: shortDialogsMatch ? parseInt(shortDialogsMatch[1]) : (totalDialogsMatch ? parseInt(totalDialogsMatch[1]) : 0),
+      medium_dialogs: mediumDialogsMatch ? parseInt(mediumDialogsMatch[1]) : 0,
+      long_dialogs: longDialogsMatch ? parseInt(longDialogsMatch[1]) : 0,
+      new_clients: newClientsMatch ? parseInt(newClientsMatch[1]) : 0,
+      returning_clients: returningClientsMatch ? parseInt(returningClientsMatch[1]) : 0,
     };
   };
   const handleSaveData = async (e: React.FormEvent) => {
@@ -253,6 +297,8 @@ export default function AdminDashboard() {
         short_dialogs: 0,
         medium_dialogs: 0,
         long_dialogs: 0,
+        new_clients: 0,
+        returning_clients: 0,
       };
  
       const metricToSave = { ...baseMetric } as any;
@@ -278,10 +324,12 @@ export default function AdminDashboard() {
       }
       if (updateFlags.dialogs) {
         metricToSave.short_dialogs = parsedMetrics.short_dialogs;
-      }
-      if (updateFlags.new_vs_returning) {
         metricToSave.medium_dialogs = parsedMetrics.medium_dialogs;
         metricToSave.long_dialogs = parsedMetrics.long_dialogs;
+      }
+      if (updateFlags.new_vs_returning) {
+        metricToSave.new_clients = parsedMetrics.new_clients;
+        metricToSave.returning_clients = parsedMetrics.returning_clients;
       }
  
       await createMetric.mutateAsync(metricToSave);
@@ -846,8 +894,8 @@ export default function AdminDashboard() {
               <DoughnutChartCard
                 title="Новые / Повторные клиенты"
                 data={[
-                  { name: "Новые", value: aggregatedMetric.medium_dialogs || 0 },
-                  { name: "Повторные", value: aggregatedMetric.long_dialogs || 0 },
+                  { name: "Новые", value: aggregatedMetric.new_clients || 0 },
+                  { name: "Повторные", value: aggregatedMetric.returning_clients || 0 },
                 ]}
                 colors={["hsl(189 94% 43%)", "hsl(280 70% 60%)"]}
               />
@@ -882,7 +930,7 @@ export default function AdminDashboard() {
                 id="clientData"
                 className="bg-muted border text-foreground mt-2 rounded-lg"
                 rows={8}
-                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 50000, повторные 45, удовлетворенность 90%, рабочее 120, нерабочее 30, диалогов 200, новые клиенты 80, повторные клиенты 120)"
+                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 5 часов, подтвержденные записи 45, удовлетворенность 90%, всего записей 150, рабочее 88%, нерабочее 12%, короткие диалоги 30, средние диалоги 50, долгие диалоги 70, новые клиенты 80, повторные клиенты 120)"
                 value={clientData}
                 onChange={(e) => setClientData(e.target.value)}
                 maxLength={5000}
