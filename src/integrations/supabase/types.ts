@@ -95,8 +95,10 @@ export type Database = {
           id: string
           long_dialogs: number | null
           medium_dialogs: number | null
+          new_clients: number | null
           non_business_hours_appointments: number | null
           period_type: string | null
+          returning_clients: number | null
           satisfaction: number | null
           short_dialogs: number | null
           time_saved_hours: number | null
@@ -112,8 +114,10 @@ export type Database = {
           id?: string
           long_dialogs?: number | null
           medium_dialogs?: number | null
+          new_clients?: number | null
           non_business_hours_appointments?: number | null
           period_type?: string | null
+          returning_clients?: number | null
           satisfaction?: number | null
           short_dialogs?: number | null
           time_saved_hours?: number | null
@@ -129,8 +133,10 @@ export type Database = {
           id?: string
           long_dialogs?: number | null
           medium_dialogs?: number | null
+          new_clients?: number | null
           non_business_hours_appointments?: number | null
           period_type?: string | null
+          returning_clients?: number | null
           satisfaction?: number | null
           short_dialogs?: number | null
           time_saved_hours?: number | null

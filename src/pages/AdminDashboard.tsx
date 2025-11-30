@@ -193,31 +193,44 @@ export default function AdminDashboard() {
     const satisfactionMatch = data.match(/удовлетворенност[ьи][\s:]+(\d+[.,]?\d*)/i);
     
     // Извлекаем общее количество записей для расчета процентов
-    const totalAppointmentsMatch = data.match(/(?:всего|общее|записей)[\s:]+(\d+)/i);
-    const totalAppointments = totalAppointmentsMatch ? parseInt(totalAppointmentsMatch[1]) : 0;
+    const totalAppointmentsMatch = data.match(/(?:всего\s*записей|общее\s*количество|записей\s*всего)[\s:]+(\d+)/i);
+    let totalAppointments = totalAppointmentsMatch ? parseInt(totalAppointmentsMatch[1]) : 0;
+    
+    // Если не указано общее количество, попробуем использовать подтвержденные записи
+    if (totalAppointments === 0 && confirmedAppointmentsMatch) {
+      totalAppointments = parseInt(confirmedAppointmentsMatch[1]);
+    }
     
     // Ищем записи по времени - сначала проценты
-    const businessHoursPercentMatch = data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+[.,]?\d*)%/i);
-    const nonBusinessHoursPercentMatch = data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)[\s:]+(\d+[.,]?\d*)%/i);
+    const businessHoursPercentMatch = data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+[.,]?\d*)\s*%/i);
+    const nonBusinessHoursPercentMatch = data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего|нерабочее)[\s:]+(\d+[.,]?\d*)\s*%/i);
     
     // Если нет процентов, ищем абсолютные числа
-    const businessHoursAbsMatch = !businessHoursPercentMatch && data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+)/i);
-    const nonBusinessHoursAbsMatch = !nonBusinessHoursPercentMatch && data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)[\s:]+(\d+)/i);
+    const businessHoursAbsMatch = !businessHoursPercentMatch && data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+)(?!\s*%)/i);
+    const nonBusinessHoursAbsMatch = !nonBusinessHoursPercentMatch && data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего|нерабочее)[\s:]+(\d+)(?!\s*%)/i);
     
     // Рассчитываем абсолютные значения
     let businessHours = 0;
     let nonBusinessHours = 0;
     
-    if (businessHoursPercentMatch && totalAppointments > 0) {
+    if (businessHoursPercentMatch) {
       const percent = parseFloat(businessHoursPercentMatch[1].replace(',', '.'));
-      businessHours = Math.round((percent / 100) * totalAppointments);
+      if (totalAppointments > 0) {
+        businessHours = Math.round((percent / 100) * totalAppointments);
+      } else {
+        console.warn("Указаны проценты для записей по времени, но не найдено общее количество записей");
+      }
     } else if (businessHoursAbsMatch) {
       businessHours = parseInt(businessHoursAbsMatch[1]);
     }
     
-    if (nonBusinessHoursPercentMatch && totalAppointments > 0) {
+    if (nonBusinessHoursPercentMatch) {
       const percent = parseFloat(nonBusinessHoursPercentMatch[1].replace(',', '.'));
-      nonBusinessHours = Math.round((percent / 100) * totalAppointments);
+      if (totalAppointments > 0) {
+        nonBusinessHours = Math.round((percent / 100) * totalAppointments);
+      } else {
+        console.warn("Указаны проценты для записей по времени, но не найдено общее количество записей");
+      }
     } else if (nonBusinessHoursAbsMatch) {
       nonBusinessHours = parseInt(nonBusinessHoursAbsMatch[1]);
     }
