@@ -5,9 +5,10 @@ interface DoughnutChartCardProps {
   title: string;
   data: Array<{ name: string; value: number }>;
   colors: string[];
+  isPercentage?: boolean;
 }
 
-export default function DoughnutChartCard({ title, data, colors }: DoughnutChartCardProps) {
+export default function DoughnutChartCard({ title, data, colors, isPercentage = false }: DoughnutChartCardProps) {
   const total = data?.reduce((sum, item) => sum + (isNaN(item.value) ? 0 : item.value), 0) ?? 0;
 
   if (!data || data.length === 0 || total === 0) {
@@ -21,10 +22,16 @@ export default function DoughnutChartCard({ title, data, colors }: DoughnutChart
     );
   }
 
-  const chartData = data.map((item) => ({
-    name: item.name,
-    value: Number(((item.value / total) * 100).toFixed(1)),
-  }));
+  // Если данные уже в процентах, используем их как есть, иначе пересчитываем
+  const chartData = isPercentage 
+    ? data.map((item) => ({
+        name: item.name,
+        value: Number(item.value.toFixed(1)),
+      }))
+    : data.map((item) => ({
+        name: item.name,
+        value: Number(((item.value / total) * 100).toFixed(1)),
+      }));
 
   // Custom label to show value with % sign
   const renderLabel = (entry: any) => {

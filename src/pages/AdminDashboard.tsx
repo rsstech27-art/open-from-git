@@ -201,7 +201,7 @@ export default function AdminDashboard() {
       totalAppointments = parseInt(confirmedAppointmentsMatch[1]);
     }
     
-    // Ищем записи по времени - сначала проценты
+    // Ищем записи по времени - проценты сохраняем как есть
     const businessHoursPercentMatch = data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+[.,]?\d*)\s*%/i);
     const nonBusinessHoursPercentMatch = data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего|нерабочее)[\s:]+(\d+[.,]?\d*)\s*%/i);
     
@@ -209,28 +209,18 @@ export default function AdminDashboard() {
     const businessHoursAbsMatch = !businessHoursPercentMatch && data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+)(?!\s*%)/i);
     const nonBusinessHoursAbsMatch = !nonBusinessHoursPercentMatch && data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего|нерабочее)[\s:]+(\d+)(?!\s*%)/i);
     
-    // Рассчитываем абсолютные значения
+    // Сохраняем проценты как проценты (88 → 88), абсолютные числа как есть
     let businessHours = 0;
     let nonBusinessHours = 0;
     
     if (businessHoursPercentMatch) {
-      const percent = parseFloat(businessHoursPercentMatch[1].replace(',', '.'));
-      if (totalAppointments > 0) {
-        businessHours = Math.round((percent / 100) * totalAppointments);
-      } else {
-        console.warn("Указаны проценты для записей по времени, но не найдено общее количество записей");
-      }
+      businessHours = parseFloat(businessHoursPercentMatch[1].replace(',', '.'));
     } else if (businessHoursAbsMatch) {
       businessHours = parseInt(businessHoursAbsMatch[1]);
     }
     
     if (nonBusinessHoursPercentMatch) {
-      const percent = parseFloat(nonBusinessHoursPercentMatch[1].replace(',', '.'));
-      if (totalAppointments > 0) {
-        nonBusinessHours = Math.round((percent / 100) * totalAppointments);
-      } else {
-        console.warn("Указаны проценты для записей по времени, но не найдено общее количество записей");
-      }
+      nonBusinessHours = parseFloat(nonBusinessHoursPercentMatch[1].replace(',', '.'));
     } else if (nonBusinessHoursAbsMatch) {
       nonBusinessHours = parseInt(nonBusinessHoursAbsMatch[1]);
     }
@@ -917,6 +907,7 @@ export default function AdminDashboard() {
                   { name: "Нерабочее время", value: aggregatedMetric.non_business_hours_appointments },
                 ]}
                 colors={["hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
+                isPercentage={true}
               />
               <DoughnutChartCard
                 title="Новые / Повторные клиенты"
@@ -957,7 +948,7 @@ export default function AdminDashboard() {
                 id="clientData"
                 className="bg-muted border text-foreground mt-2 rounded-lg"
                 rows={8}
-                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 5,5 часов, подтвержденные записи 45, удовлетворенность 90%, всего записей 150, рабочее 88%, нерабочее 12%, короткие диалоги 30, средние диалоги 50, долгие диалоги 70, новые клиенты 80, повторные клиенты 120)"
+                placeholder="Вставьте данные клиента (например: конверсия 75%, автономность 85%, экономия 5,5 часов, подтвержденные записи 45, удовлетворенность 90%, рабочее 88%, нерабочее 12%, короткие диалоги 30, средние диалоги 50, долгие диалоги 70, новые клиенты 80, повторные клиенты 120)"
                 value={clientData}
                 onChange={(e) => setClientData(e.target.value)}
                 maxLength={5000}
