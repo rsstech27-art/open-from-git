@@ -26,7 +26,7 @@ export default function KpiCard({ title, value, icon: Icon, gradient }: KpiCardP
           <p className="text-sm font-light opacity-90">{title}</p>
           <Icon className="w-6 h-6 opacity-80" />
         </div>
-        <p className="text-3xl font-light">{value}</p>
+        <p className="text-3xl font-light leading-none">{value}</p>
       </div>
     </Card>
   );
