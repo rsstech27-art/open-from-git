@@ -202,12 +202,12 @@ export default function AdminDashboard() {
     }
     
     // Ищем записи по времени - проценты сохраняем как есть
-    const businessHoursPercentMatch = data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+[.,]?\d*)\s*%/i);
-    const nonBusinessHoursPercentMatch = data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего|нерабочее)[\s:]+(\d+[.,]?\d*)\s*%/i);
+    const businessHoursPercentMatch = data.match(/(?:\bрабоч[иеа]+(?:\s+врем[яи]+)?|\bв\s+рабочее)[\s:]+(\d+[.,]?\d*)\s*%/i);
+    const nonBusinessHoursPercentMatch = data.match(/(?:\bнерабоч[иеа]+(?:\s+врем[яи]+)?|\bвне\s+рабочего|\bнерабочее)[\s:]+(\d+[.,]?\d*)\s*%/i);
     
     // Если нет процентов, ищем абсолютные числа
-    const businessHoursAbsMatch = !businessHoursPercentMatch && data.match(/(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+)(?!\s*%)/i);
-    const nonBusinessHoursAbsMatch = !nonBusinessHoursPercentMatch && data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего|нерабочее)[\s:]+(\d+)(?!\s*%)/i);
+    const businessHoursAbsMatch = !businessHoursPercentMatch && data.match(/(?:\bрабоч[иеа]+(?:\s+врем[яи]+)?|\bв\s+рабочее)[\s:]+(\d+)(?!\s*%)/i);
+    const nonBusinessHoursAbsMatch = !nonBusinessHoursPercentMatch && data.match(/(?:\bнерабоч[иеа]+(?:\s+врем[яи]+)?|\bвне\s+рабочего|\bнерабочее)[\s:]+(\d+)(?!\s*%)/i);
     
     // Сохраняем проценты как проценты (88 → 88), абсолютные числа как есть
     let businessHours = 0;
