@@ -201,29 +201,13 @@ export default function AdminDashboard() {
       totalAppointments = parseInt(confirmedAppointmentsMatch[1]);
     }
     
-    // Ищем записи по времени - проценты сохраняем как есть
-    const businessHoursPercentMatch = data.match(/(?:\bрабоч[иеа]+(?:\s+врем[яи]+)?|\bв\s+рабочее)[\s:]+(\d+[.,]?\d*)\s*%/i);
-    const nonBusinessHoursPercentMatch = data.match(/(?:\bнерабоч[иеа]+(?:\s+врем[яи]+)?|\bвне\s+рабочего|\bнерабочее)[\s:]+(\d+[.,]?\d*)\s*%/i);
+    // Ищем записи по времени - с % или без, считаем процентами
+    // Сначала ищем "нерабочее" (более специфичное), потом "рабочее"
+    const nonBusinessHoursMatch = data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)[\s:]+(\d+[.,]?\d*)\s*%?/i);
+    const businessHoursMatch = data.match(/(?:^|[^\u0430-\u044f])(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+[.,]?\d*)\s*%?/i);
     
-    // Если нет процентов, ищем абсолютные числа
-    const businessHoursAbsMatch = !businessHoursPercentMatch && data.match(/(?:\bрабоч[иеа]+(?:\s+врем[яи]+)?|\bв\s+рабочее)[\s:]+(\d+)(?!\s*%)/i);
-    const nonBusinessHoursAbsMatch = !nonBusinessHoursPercentMatch && data.match(/(?:\bнерабоч[иеа]+(?:\s+врем[яи]+)?|\bвне\s+рабочего|\bнерабочее)[\s:]+(\d+)(?!\s*%)/i);
-    
-    // Сохраняем проценты как проценты (88 → 88), абсолютные числа как есть
-    let businessHours = 0;
-    let nonBusinessHours = 0;
-    
-    if (businessHoursPercentMatch) {
-      businessHours = parseFloat(businessHoursPercentMatch[1].replace(',', '.'));
-    } else if (businessHoursAbsMatch) {
-      businessHours = parseInt(businessHoursAbsMatch[1]);
-    }
-    
-    if (nonBusinessHoursPercentMatch) {
-      nonBusinessHours = parseFloat(nonBusinessHoursPercentMatch[1].replace(',', '.'));
-    } else if (nonBusinessHoursAbsMatch) {
-      nonBusinessHours = parseInt(nonBusinessHoursAbsMatch[1]);
-    }
+    const businessHours = businessHoursMatch ? parseFloat(businessHoursMatch[1].replace(',', '.')) : 0;
+    const nonBusinessHours = nonBusinessHoursMatch ? parseFloat(nonBusinessHoursMatch[1].replace(',', '.')) : 0;
     
     // Извлекаем типы диалогов
     const shortDialogsMatch = data.match(/(?:коротк[иеа]+\s*диалог[иова]+)[\s:]+(\d+)/i);
@@ -232,9 +216,9 @@ export default function AdminDashboard() {
     const totalDialogsMatch = !shortDialogsMatch && !mediumDialogsMatch && !longDialogsMatch 
       && data.match(/(?:диалог[иова]+|всего\s+диалогов)[\s:]+(\d+)/i);
     
-    // Извлекаем новых и повторных клиентов
-    const newClientsMatch = data.match(/(?:нов[ыхе]+\s*клиент[ыиов]+)[\s:]+(\d+)/i);
-    const returningClientsMatch = data.match(/(?:повторн[ыхе]+\s*клиент[ыиов]+)[\s:]+(\d+)/i);
+    // Извлекаем новых и повторных клиентов (слово "клиент" опционально)
+    const newClientsMatch = data.match(/(?:нов[ыхе]+(?:\s*клиент[ыиов]+)?)[\s:]+(\d+)/i);
+    const returningClientsMatch = data.match(/(?:повторн[ыхе]+(?:\s*клиент[ыиов]+)?)[\s:]+(\d+)/i);
 
     return {
       conversion: conversionMatch ? parseFloat(conversionMatch[1].replace(',', '.')) / 100 : 0,
