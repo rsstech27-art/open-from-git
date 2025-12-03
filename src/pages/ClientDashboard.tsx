@@ -87,8 +87,9 @@ export default function ClientDashboard() {
       time_saved_hours: sum.time_saved_hours,
       confirmed_appointments: sum.confirmed_appointments,
       satisfaction: sum.satisfaction / metrics.length,
-      business_hours_appointments: sum.business_hours_appointments,
-      non_business_hours_appointments: sum.non_business_hours_appointments,
+      // These are percentages, so we need averages, not sums
+      business_hours_appointments: sum.business_hours_appointments / metrics.length,
+      non_business_hours_appointments: sum.non_business_hours_appointments / metrics.length,
       short_dialogs: sum.short_dialogs,
       medium_dialogs: sum.medium_dialogs,
       long_dialogs: sum.long_dialogs,
@@ -276,49 +277,58 @@ export default function ClientDashboard() {
 
           {aggregatedMetric && metrics.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {viewMode !== "month" && (
-                <>
-                  <LineChartCard
-                    title="Конверсия в запись"
-                    data={metrics.map((m) => {
-                      const [year, month] = (m.period_type || '').split('-');
-                      const date = new Date(parseInt(year), parseInt(month) - 1);
-                      const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
-                      return {
-                        name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
-                        value: Number((m.conversion * 100).toFixed(1))
-                      };
-                    })}
-                    color="hsl(189 94% 43%)"
-                  />
-                  <LineChartCard
-                    title="Автономность (без админа)"
-                    data={metrics.map((m) => {
-                      const [year, month] = (m.period_type || '').split('-');
-                      const date = new Date(parseInt(year), parseInt(month) - 1);
-                      const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
-                      return {
-                        name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
-                        value: Number((m.autonomy * 100).toFixed(1))
-                      };
-                    })}
-                    color="hsl(280 70% 60%)"
-                  />
-                  <BarChartCard
-                    title="Экономия времени (часы)"
-                    data={metrics.map((m) => {
-                      const [year, month] = (m.period_type || '').split('-');
-                      const date = new Date(parseInt(year), parseInt(month) - 1);
-                      const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
-                      return {
-                        name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
-                        value: m.time_saved_hours || 0
-                      };
-                    })}
-                    color="hsl(189 94% 43%)"
-                  />
-                </>
-              )}
+              {viewMode !== "month" && (() => {
+                // Sort metrics by period_type (earliest first)
+                const sortedMetrics = [...metrics].sort((a, b) => {
+                  const [yearA, monthA] = (a.period_type || '').split('-').map(Number);
+                  const [yearB, monthB] = (b.period_type || '').split('-').map(Number);
+                  return yearA !== yearB ? yearA - yearB : monthA - monthB;
+                });
+
+                return (
+                  <>
+                    <LineChartCard
+                      title="Конверсия в запись"
+                      data={sortedMetrics.map((m) => {
+                        const [year, month] = (m.period_type || '').split('-');
+                        const date = new Date(parseInt(year), parseInt(month) - 1);
+                        const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                        return {
+                          name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                          value: Number((m.conversion * 100).toFixed(1))
+                        };
+                      })}
+                      color="hsl(189 94% 43%)"
+                    />
+                    <LineChartCard
+                      title="Автономность (без админа)"
+                      data={sortedMetrics.map((m) => {
+                        const [year, month] = (m.period_type || '').split('-');
+                        const date = new Date(parseInt(year), parseInt(month) - 1);
+                        const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                        return {
+                          name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                          value: Number((m.autonomy * 100).toFixed(1))
+                        };
+                      })}
+                      color="hsl(280 70% 60%)"
+                    />
+                    <BarChartCard
+                      title="Экономия времени (часы)"
+                      data={sortedMetrics.map((m) => {
+                        const [year, month] = (m.period_type || '').split('-');
+                        const date = new Date(parseInt(year), parseInt(month) - 1);
+                        const monthName = date.toLocaleDateString('ru-RU', { month: 'short' });
+                        return {
+                          name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+                          value: m.time_saved_hours || 0
+                        };
+                      })}
+                      color="hsl(189 94% 43%)"
+                    />
+                  </>
+                );
+              })()}
               <GaugeChartCard
                 title="Удовлетворенность клиента"
                 value={aggregatedMetric.satisfaction}
@@ -331,6 +341,7 @@ export default function ClientDashboard() {
                   { name: "Нерабочее время", value: aggregatedMetric.non_business_hours_appointments },
                 ]}
                 colors={["hsl(280 70% 60%)", "hsl(330 85% 65%)"]}
+                isPercentage={true}
               />
             </div>
           ) : null}
