@@ -58,7 +58,7 @@ export function useMetrics(clientId: string | undefined, period: string) {
         query = query.in("period_type", periods);
       }
 
-      const { data, error } = await query.order("date", { ascending: true });
+      const { data, error } = await query.order("period_type", { ascending: true });
 
       if (error) throw error;
       return data as Metric[];
