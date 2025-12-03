@@ -22,16 +22,11 @@ export default function DoughnutChartCard({ title, data, colors, isPercentage = 
     );
   }
 
-  // Если данные уже в процентах, используем их как есть, иначе пересчитываем
-  const chartData = isPercentage 
-    ? data.map((item) => ({
-        name: item.name,
-        value: Number(item.value.toFixed(1)),
-      }))
-    : data.map((item) => ({
-        name: item.name,
-        value: Number(((item.value / total) * 100).toFixed(1)),
-      }));
+  // Всегда нормализуем данные до 100% для корректного отображения
+  const chartData = data.map((item) => ({
+    name: item.name,
+    value: Number(((item.value / total) * 100).toFixed(1)),
+  }));
 
   // Custom label to show value with % sign
   const renderLabel = (entry: any) => {
