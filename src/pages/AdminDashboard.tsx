@@ -202,9 +202,9 @@ export default function AdminDashboard() {
     }
     
     // Ищем записи по времени - с % или без, считаем процентами
-    // Сначала ищем "нерабочее" (более специфичное), потом "рабочее"
+    // Используем negative lookbehind чтобы "рабочее" не матчилось внутри "нерабочее"
     const nonBusinessHoursMatch = data.match(/(?:нерабоч[иеа]+(?:\s+врем[яи]+)?|вне\s+рабочего)[\s:]+(\d+[.,]?\d*)\s*%?/i);
-    const businessHoursMatch = data.match(/(?:^|[^\u0430-\u044f])(?:рабоч[иеа]+(?:\s+врем[яи]+)?|в\s+рабочее)[\s:]+(\d+[.,]?\d*)\s*%?/i);
+    const businessHoursMatch = data.match(/(?<!не)рабоч[иеа]+(?:\s+врем[яи]+)?[\s:]+(\d+[.,]?\d*)\s*%?/i);
     
     const businessHours = businessHoursMatch ? parseFloat(businessHoursMatch[1].replace(',', '.')) : 0;
     const nonBusinessHours = nonBusinessHoursMatch ? parseFloat(nonBusinessHoursMatch[1].replace(',', '.')) : 0;
