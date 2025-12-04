@@ -278,12 +278,16 @@ export default function ClientDashboard() {
           {aggregatedMetric && metrics.length > 0 ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {viewMode !== "month" && (() => {
-                // Sort metrics by period_type (earliest first)
-                const sortedMetrics = [...metrics].sort((a, b) => {
-                  const [yearA, monthA] = (a.period_type || '').split('-').map(Number);
-                  const [yearB, monthB] = (b.period_type || '').split('-').map(Number);
-                  return yearA !== yearB ? yearA - yearB : monthA - monthB;
-                });
+                // Sort metrics by period_type (earliest first) and filter only months with data
+                const sortedMetrics = [...metrics]
+                  .filter((m) => m.conversion > 0 || m.autonomy > 0 || (m.time_saved_hours || 0) > 0)
+                  .sort((a, b) => {
+                    const [yearA, monthA] = (a.period_type || '').split('-').map(Number);
+                    const [yearB, monthB] = (b.period_type || '').split('-').map(Number);
+                    return yearA !== yearB ? yearA - yearB : monthA - monthB;
+                  });
+
+                if (sortedMetrics.length === 0) return null;
 
                 return (
                   <>
